@@ -12,8 +12,10 @@ function calculatePath(startPoint, config) {
   const escapePath = [[realValue, complexValue]];
 
   for (let i = 0; i < iterations; i++) {
-    realValue = realValue**2 - complexValue ** 2;
-    complexValue = 2 * realValue * complexValue;
+    realValueNew = realValue**2 - complexValue**2;
+    complexValue = 2 * realValue * complexValue + startPoint[1];
+    realValue = realValueNew + startPoint[0];
+
     if (Math.abs(realValue) > escapeReal || Math.abs(complexValue) > escapeComplex) {
       //The value has 'escaped' to infinity and thus it's path is in the buddhabrot
       return escapePath;
@@ -28,16 +30,16 @@ function calculatePath(startPoint, config) {
  * @returns 
  */
 exports.generateAllPoints = function findAllPaths(config) {
-  const { setDimensions, calculationAccuracy } = config
-  const accuracy = 1/calculationAccuracy
-  const escapePaths = []
+  const { setDimensions, calculationAccuracy } = config;
+  const accuracy = 1/calculationAccuracy;
+  const escapePaths = [];
   for (let height = setDimensions.up; height > setDimensions.down; height = height - accuracy) {
     for (let width = setDimensions.left; width < setDimensions.right; width = width + accuracy) {
       const path = calculatePath([width, height], config);
       if (path)
-        escapePaths.push(calculatePath([width, height], config))
+        escapePaths.push(path);
     }
   }
-  return escapePaths.flat()
+  return escapePaths.flat();
 }
 

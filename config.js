@@ -17,7 +17,7 @@
  */
 exports.init = function init () {
   return {
-    imageScaleup: 6,
+    imageScaleup: 200,
     setDimensions: {
       up: 2,
       down: -2,
@@ -26,9 +26,9 @@ exports.init = function init () {
     },
     escapeReal: 3,
     escapeComplex: 3,
-    iterations: 5,
+    iterations: 1000,
     // (setDimensions[direction] * calculationAccuracy) is the number of starting points
     // that will be calculated, spaced evenly across the set.
-    calculationAccuracy: 5,
+    calculationAccuracy: 200,
   }
 }
