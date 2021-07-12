@@ -7,10 +7,8 @@ exports.cleanupSet = function cleanPoints(allPoints, config){
   const { imageScaleup, setDimensions } = config
   const width = imageScaleup * (setDimensions.right - setDimensions.left)+1;
   const height = imageScaleup * (setDimensions.up - setDimensions.down)+1;
-  let widthArray = new Array(width).fill(0)
-  //console.log(widthArray[widthArray.length-1])
-  const imagePointOccurances = new Array(height).fill([].concat(widthArray))
-  //console.log(imagePointOccurances[imagePointOccurances.length-1][imagePointOccurances[0].length-1])
+  const imagePointOccurances = new Array(height).fill().map(() => Array(width).fill(0))
+
   for (let point of allPoints) {
     if ( true 
       && point[0] > setDimensions.left 
