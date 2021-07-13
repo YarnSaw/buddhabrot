@@ -10,25 +10,24 @@
  * @property {object} setDimensions - how far in each direction to compute in real and complex axes.
  */
 
-
 /**
  * Returns the configuration that will always be used for the image
  * @returns {config} Configuration
  */
-exports.init = function init () {
+exports.init = function init() {
   return {
-    imageScaleup: 200,
+    imageScaleup: 150,
     setDimensions: {
       up: 2,
       down: -2,
       right: 1,
-      left: -2.5, 
+      left: -2.5,
     },
     escapeReal: 3,
     escapeComplex: 3,
-    iterations: 1000,
+    iterations: 2,
     // (setDimensions[direction] * calculationAccuracy) is the number of starting points
     // that will be calculated, spaced evenly across the set.
     calculationAccuracy: 200,
-  }
-}
+  };
+};

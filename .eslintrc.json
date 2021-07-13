@@ -12,7 +12,15 @@
     "plugins": ["import", "node", "promise"],
     "root": true,
     "rules": {
-      "semi": ["error", "always"]
-      
+      "comma-dangle": ["error", {
+        "objects": "always",
+        "functions": "never",
+        "arrays": "never"
+        }
+      ],
+      "operator-linebreak": ["error", "before"],
+      "semi": ["error", "always"],
+      "space-before-function-paren": ["error", "never"],
+      "space-in-parens": ["off"]
     }
 }
