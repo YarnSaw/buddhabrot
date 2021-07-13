@@ -19,5 +19,9 @@
   "dependencies": {
     "canvas": "^2.8.0",
     "fs": "0.0.1-security"
+  },
+  "devDependencies": {
+    "eslint": "^7.30.0",
+    "standard": "^16.0.3"
   }
 }
