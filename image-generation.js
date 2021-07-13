@@ -49,7 +49,7 @@ exports.drawCanvas = function drawCanvas(context, cleanedSet, width, height, mos
     const coloring = colorFunc(cleanedSet[i], mostVisits);
     imgData.data[i * 4 + 0] = coloring[0];
     imgData.data[i * 4 + 1] = coloring[1];
-    imgData.data[i * 4 + 1] = coloring[2];
+    imgData.data[i * 4 + 2] = coloring[2];
     imgData.data[i * 4 + 3] = 255;
   }
   context.putImageData(imgData, 0, 0);

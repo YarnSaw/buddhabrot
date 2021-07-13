@@ -54,6 +54,10 @@ exports.generateAllPoints = function findAllPaths(config) {
   const accuracy = 1 / calculationAccuracy;
   const escapePaths = [];
   for (let height = setDimensions.up; height > setDimensions.down; height = height - accuracy) {
+    if (config.dcp) {
+      // eslint-disable-next-line no-undef
+      progress();
+    }
     for (let width = setDimensions.left; width < setDimensions.right; width = width + accuracy) {
       const path = calculatePath([width, height], config);
       if (path) {

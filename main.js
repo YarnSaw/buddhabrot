@@ -12,44 +12,59 @@
 
 'use strict';
 
-const { createCanvas, } = require('canvas');
-const fs = require('fs');
+require('dotenv').config();
 
 /** @type {config} */
 const config = require('./config.js').init();
-const { generateAllPoints, } = require('./set-generation');
-const { cleanupSet, drawCanvas, } = require('./image-generation');
+// const { generateAllPoints, } = require('./set-generation');
+// const { cleanupSet, drawCanvas, } = require('./image-generation');
+const { createAndSaveFrame, } = require('./single-frame.js');
 
-async function main() {
-  // Find all the points for the set.
-  const setPoints = generateAllPoints(config);
+async function main(dcp, imagePath = './img.png') {
+  if (dcp) {
+    await require('dcp-client').init();
+    const compute = require('dcp/compute');
+    const wallet = require('dcp/wallet');
 
-  // Process the points / prepare them for the image
-  let cleanedSet = cleanupSet(setPoints, config);
-  const width = cleanedSet[0].length;
-  const height = cleanedSet.length;
-  cleanedSet = cleanedSet.flat();
+    const workFunction = function work(iter, config) {
+      config.iterations = iter;
+      config.dcp = true;
+      const { createFrame, } = require('./single-frame');
+      return createFrame(config);
+    };
 
-  // Need to get the most visited so we can scale image brightness accordingly
-  // console.log(cleanedSet.length, cleanedSet[0].length)
-  const countOfMostVisits = cleanedSet.reduce(function(a, b) {
-    return Math.max(a, b);
-  });
-  console.log(`Most visits to a single pixel is ${countOfMostVisits}`);
+    const job = compute.for(
+      [10, 20], workFunction, [config]
+    );
 
-  const canvas = createCanvas(width, height);
-  const context = canvas.getContext('2d');
-  const colorFunc = (visits, mostVisits) => {
-    return [
-      visits / mostVisits * 255,
-      visits / mostVisits * 255,
-      0];
-  };
+    job.on('accepted', () => {
+      console.log(` - Job accepted by scheduler, waiting for results`);
+      console.log(` - Job has id ${job.id}`);
+    });
 
-  drawCanvas(context, cleanedSet, width, height, countOfMostVisits, colorFunc);
+    job.on('readystatechange', (arg) => {
+      console.log(`new ready state: ${arg}`);
+    });
 
-  const buffer = canvas.toBuffer('image/png');
-  fs.writeFileSync('./img.png', buffer);
+    job.on('result', (ev) => {
+      console.log("Got a result", ev.sliceNumber);
+    });
+
+    job.requires('./single-frame');
+    job.computeGroups = [{ joinKey: 'wyld-stallyns', joinSecret: 'QmUgZXhjZWxsZW50IHRvIGVhY2ggb3RoZXIK', }];
+    job.public.name = "buddhabrot generation";
+    const ks = await wallet.get();
+    job.setPaymentAccountKeystore(ks);
+    let results = await job.exec();
+    results = Array.from(results);
+
+    for (let i = 0; i < results.length; i++) {
+      const { saveFrame, } = require('./single-frame.js');
+      saveFrame(results[i], `./img/img${i}.png`);
+    }
+  } else {
+    createAndSaveFrame(config, imagePath);
+  }
 }
 
-main();
+main(process.env.DCP === 'true');
