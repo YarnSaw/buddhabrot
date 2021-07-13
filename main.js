@@ -1,14 +1,30 @@
+/**
+ *  @file       main.js
+ *  @author     Ryan Saweczko, yarn.sawe@gmail.com
+ *  @date       July 2021
+ *
+ * Entrypoint for budhhabot generation
+ */
+
+/**
+ * @typedef {import('./config.js').config} config
+ */
+
+'use strict';
 
 const { createCanvas, } = require('canvas');
 const fs = require('fs');
 
+/** @type {config} */
 const config = require('./config.js').init();
 const { generateAllPoints, } = require('./set-generation');
-const { cleanupSet, } = require('./image-generation');
+const { cleanupSet, drawCanvas, } = require('./image-generation');
 
 async function main() {
+  // Find all the points for the set.
   const setPoints = generateAllPoints(config);
 
+  // Process the points / prepare them for the image
   let cleanedSet = cleanupSet(setPoints, config);
   const width = cleanedSet[0].length;
   const height = cleanedSet.length;
@@ -23,17 +39,15 @@ async function main() {
 
   const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');
-  const imgData = context.createImageData(width, height);
+  const colorFunc = (visits, mostVisits) => {
+    return [
+      visits / mostVisits * 255,
+      visits / mostVisits * 255,
+      0];
+  };
 
-  for (let i = 0; i < width * height; i++) {
-    if (i % 100000 === 0) {
-      console.log(`reached ${i} of ${width * height} total`);
-    }
-    imgData.data[i * 4] = cleanedSet[i] / countOfMostVisits * 255;
-    imgData.data[i * 4 + 3] = 255;
-  }
+  drawCanvas(context, cleanedSet, width, height, countOfMostVisits, colorFunc);
 
-  context.putImageData(imgData, 0, 0);
   const buffer = canvas.toBuffer('image/png');
   fs.writeFileSync('./img.png', buffer);
 }

@@ -1,14 +1,24 @@
 
 /**
+ *  @file       set-generation.js
+ *  @author     Ryan Saweczko, yarn.sawe@gmail.com
+ *  @date       July 2021
+ *
+ * Utility functions create the set of all points in the buddhabrot
+ */
+
+/**
  * @typedef {import('./config.js').config} config
  */
 
 'use strict';
+
 /**
  * Calculates if a given point is in the mandelbrot, and if it isn't
  * will return the escape path.
  * @param {Array} startPoint
  * @param {config} config
+ * @returns {Array.<number[]>} path points take to escape the set.
  */
 function calculatePath(startPoint, config) {
   const { iterations, escapeDistance, } = config;
@@ -35,8 +45,9 @@ function calculatePath(startPoint, config) {
   return;
 }
 /**
+ * Calculates the escape paths of all points as defined in the buddhabrot config.
  * @param {config} config
- * @returns
+ * @returns {Array.<number[]>} - list of all escape paths of all points calculated.
  */
 exports.generateAllPoints = function findAllPaths(config) {
   const { setDimensions, calculationAccuracy, } = config;

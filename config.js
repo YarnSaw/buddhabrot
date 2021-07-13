@@ -1,3 +1,12 @@
+/**
+ *  @file       config.js
+ *  @author     Ryan Saweczko, yarn.sawe@gmail.com
+ *  @date       July 2021
+ *
+ * Creates a config object for the set
+ */
+
+'use strict';
 
 /**
  * @typedef config
