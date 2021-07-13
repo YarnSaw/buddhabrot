@@ -21,8 +21,10 @@ const { cleanupSet, drawCanvas, } = require('./image-generation');
 exports.createFrame = function createFrame(config) {
   // Find all the points for the set.
   const setPoints = generateAllPoints(config);
-  // eslint-disable-next-line no-undef
-  progress();
+  if (config.dcp) {
+    // eslint-disable-next-line no-undef
+    progress();
+  }
   // Process the points / prepare them for the image
   let cleanedSet = cleanupSet(setPoints, config);
   const width = cleanedSet[0].length;
