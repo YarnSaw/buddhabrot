@@ -1,23 +1,30 @@
+
+/**
+ * @typedef {import('./config.js').config} config
+ */
+
+'use strict';
 /**
  * Calculates if a given point is in the mandelbrot, and if it isn't
  * will return the escape path.
  * @param {Array} startPoint
- * @param {object} config
+ * @param {config} config
  */
 function calculatePath(startPoint, config) {
-  const { iterations, escapeReal, escapeComplex, } = config;
+  const { iterations, escapeDistance, } = config;
   let realValueNew;
   let realValue = startPoint[0];
   let complexValue = startPoint[1];
   /** @type {Array.<number[]>} */
   const escapePath = [[realValue, complexValue]];
+  const escapeDistanceSquared = escapeDistance ** 2;
 
   for (let i = 0; i < iterations; i++) {
     realValueNew = realValue ** 2 - complexValue ** 2;
     complexValue = 2 * realValue * complexValue + startPoint[1];
     realValue = realValueNew + startPoint[0];
-
-    if (Math.abs(realValue) > escapeReal || Math.abs(complexValue) > escapeComplex) {
+    const distanceFromOrigin = realValue ** 2 + complexValue ** 2;
+    if (distanceFromOrigin > escapeDistanceSquared) {
       // The value has 'escaped' to infinity and thus it's path is in the buddhabrot
       return escapePath;
     }

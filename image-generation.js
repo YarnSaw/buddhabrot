@@ -18,8 +18,8 @@ exports.cleanupSet = function cleanPoints(allPoints, config) {
       && point[0] < setDimensions.right
       && point[1] > setDimensions.down
       && point[1] < setDimensions.up) {
-      const realScaledValue = Math.floor(Math.round(point[0] * imageScaleup) + -setDimensions.left * imageScaleup);
-      const complexScaledValue = Math.floor(Math.round(point[1] * imageScaleup) + -setDimensions.down * imageScaleup);
+      const realScaledValue = Math.round(point[0] * imageScaleup + -setDimensions.left * imageScaleup);
+      const complexScaledValue = Math.round(point[1] * imageScaleup + -setDimensions.down * imageScaleup);
       imagePointOccurances[complexScaledValue][realScaledValue]++;
     }
   }
