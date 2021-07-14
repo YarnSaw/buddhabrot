@@ -16,6 +16,7 @@
  * @property {number} iterations - iterations to be computed
  * @property {number} calculationAccuracy - accuracy to calculate the image at - how many segments to cut an integer value into to compute
  * @property {object} setDimensions - how far in each direction to compute in real and complex axes.
+ * @property {Boolean} [dcp] - if the generation is done using DCP
  */
 
 /**

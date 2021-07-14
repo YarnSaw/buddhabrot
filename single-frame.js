@@ -18,27 +18,32 @@ const fs = require('fs');
 const { generateAllPoints, } = require('./set-generation');
 const { cleanupSet, drawCanvas, } = require('./image-generation');
 
+/**
+ * Creates all the necessary data for a single frame of the buddhabrot
+ * @param {config} config - buddhabrot config
+ * @returns features needed to create the buddhabrot image
+ */
 exports.createFrame = function createFrame(config) {
   // Find all the points for the set.
   const setPoints = generateAllPoints(config);
   if (config.dcp) {
-    // eslint-disable-next-line no-undef
-    progress();
+    // @ts-ignore
+    progress(); // eslint-disable-line no-undef
   }
   // Process the points / prepare them for the image
-  let cleanedSet = cleanupSet(setPoints, config);
+  const cleanedSet = cleanupSet(setPoints, config);
   const width = cleanedSet[0].length;
   const height = cleanedSet.length;
-  cleanedSet = cleanedSet.flat();
+  const flatCleanedSet = cleanedSet.flat();
 
   // Need to get the most visited so we can scale image brightness accordingly
   // console.log(cleanedSet.length, cleanedSet[0].length)
-  const countOfMostVisits = cleanedSet.reduce(function(a, b) {
+  const countOfMostVisits = flatCleanedSet.reduce(function(a, b) {
     return Math.max(a, b);
   });
 
   return {
-    cleanedSet,
+    cleanedSet: flatCleanedSet,
     countOfMostVisits,
     width,
     height,

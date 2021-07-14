@@ -16,14 +16,15 @@ require('dotenv').config();
 
 /** @type {config} */
 const config = require('./config.js').init();
-// const { generateAllPoints, } = require('./set-generation');
-// const { cleanupSet, drawCanvas, } = require('./image-generation');
+
 const { createAndSaveFrame, } = require('./single-frame.js');
 
 async function main(dcp, imagePath = './img.png') {
   if (dcp) {
     await require('dcp-client').init();
+    // @ts-ignore
     const compute = require('dcp/compute');
+    // @ts-ignore
     const wallet = require('dcp/wallet');
 
     const workFunction = function work(iter, config) {
@@ -34,7 +35,7 @@ async function main(dcp, imagePath = './img.png') {
     };
 
     const job = compute.for(
-      [10, 20], workFunction, [config]
+      [100, 1000, 5000, 10000], workFunction, [config]
     );
 
     job.on('accepted', () => {
@@ -67,4 +68,4 @@ async function main(dcp, imagePath = './img.png') {
   }
 }
 
-main(process.env.DCP === 'true');
+main(Boolean(process.env.DCP));
