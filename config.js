@@ -31,10 +31,10 @@ exports.init = function init() {
   return {
     imageScaleup: 300,
     setDimensions: {
-      up: 1.25,
-      down: -1.25,
-      right: 1,
-      left: -2,
+      up: 1.1,
+      down: -1.1,
+      right: 0.75,
+      left: -1.5,
     },
     escapeDistance: 3,
     iterations: 100,
