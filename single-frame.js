@@ -55,7 +55,11 @@ exports.saveFrame = function saveFrame(frameData, imagePath) {
   const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');
 
-  const imgData = { width, height, data: set, };
+  const imgData = context.createImageData(width, height);
+  for (let i = 0; i < set.length; i++) {
+    imgData.data[i] = set[i];
+  }
+
   context.putImageData(imgData, 0, 0);
 
   const buffer = canvas.toBuffer('image/png');

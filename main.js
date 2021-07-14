@@ -68,4 +68,5 @@ async function main(dcp, imagePath = './img.png') {
   }
 }
 
-main(Boolean(process.env.DCP));
+const DCP = process.env.DCP === 'y';
+main(DCP);
