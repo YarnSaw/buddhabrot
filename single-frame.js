@@ -15,8 +15,7 @@
 const { createCanvas, } = require('canvas');
 const fs = require('fs');
 
-const { generateAllPoints, } = require('./set-generation');
-const { cleanupSet, drawCanvas, } = require('./image-generation');
+const { generateAllPoints, processCountsToColor, cleanupSet, } = require('./set-generation');
 
 /**
  * Creates all the necessary data for a single frame of the buddhabrot
@@ -42,26 +41,22 @@ exports.createFrame = function createFrame(config) {
     return Math.max(a, b);
   });
 
+  const uint8Array = processCountsToColor(flatCleanedSet, width, height, countOfMostVisits, config.colorFunc);
+
   return {
-    cleanedSet: flatCleanedSet,
-    countOfMostVisits,
+    set: uint8Array,
     width,
     height,
   };
 };
 
 exports.saveFrame = function saveFrame(frameData, imagePath) {
-  const { cleanedSet, countOfMostVisits, width, height, } = frameData;
+  const { width, height, set, } = frameData;
   const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');
-  const colorFunc = (visits, mostVisits) => {
-    return [
-      visits / mostVisits * 255,
-      visits / mostVisits * 255,
-      0];
-  };
 
-  drawCanvas(context, cleanedSet, width, height, countOfMostVisits, colorFunc);
+  const imgData = { width, height, data: set, };
+  context.putImageData(imgData, 0, 0);
 
   const buffer = canvas.toBuffer('image/png');
   fs.writeFileSync(imagePath, buffer);

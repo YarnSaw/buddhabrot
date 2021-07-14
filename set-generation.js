@@ -67,3 +67,42 @@ exports.generateAllPoints = function findAllPaths(config) {
   }
   return escapePaths.flat();
 };
+
+/**
+ * Take a set of points pairs + a config, and will map those points to a new array
+ * that counts how often each pixel in the image has been hit
+ * @param {Array.<number[]>} allPoints - pairs of points
+ * @param {config} config - buddhabrot config
+ * @returns {Array.<number[]>} imagePointOccurances - frequency each pixel in the image is hit
+ */
+exports.cleanupSet = function cleanPoints(allPoints, config) {
+  const { imageScaleup, setDimensions, } = config;
+  const width = imageScaleup * (setDimensions.right - setDimensions.left) + 1;
+  const height = imageScaleup * (setDimensions.up - setDimensions.down) + 1;
+  const imagePointOccurances = new Array(height).fill().map(() => Array(width).fill(0));
+
+  for (const point of allPoints) {
+    if ( true
+      && point[0] > setDimensions.left
+      && point[0] < setDimensions.right
+      && point[1] > setDimensions.down
+      && point[1] < setDimensions.up) {
+      const realScaledValue = Math.round(point[0] * imageScaleup + -setDimensions.left * imageScaleup);
+      const complexScaledValue = Math.round(point[1] * imageScaleup + -setDimensions.down * imageScaleup);
+      imagePointOccurances[complexScaledValue][realScaledValue]++;
+    }
+  }
+  return imagePointOccurances;
+};
+
+exports.processCountsToColor = function processCountsToColor(cleanedSet, width, height, mostVisits, colorFunc) {
+  const uint8Array = new Uint8ClampedArray(width * height * 4);
+  for (let i = 0; i < width * height; i++) {
+    const coloring = colorFunc(cleanedSet[i], mostVisits);
+    uint8Array[i * 4 + 0] = coloring[0];
+    uint8Array[i * 4 + 1] = coloring[1];
+    uint8Array[i * 4 + 2] = coloring[2];
+    uint8Array[i * 4 + 3] = 255;
+  }
+  return uint8Array;
+};

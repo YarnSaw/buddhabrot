@@ -3,7 +3,7 @@
  *  @author     Ryan Saweczko, yarn.sawe@gmail.com
  *  @date       July 2021
  *
- * Entrypoint for budhhabot generation
+ * Entry point for buddhabrot generation
  */
 
 /**
