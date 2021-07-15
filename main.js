@@ -34,8 +34,9 @@ async function main(dcp, imagePath = './img.png') {
       return createFrame(config);
     };
 
+    // The range for work will decide the number of iterations that will be computed in each slice
     const job = compute.for(
-      [100, 1000, 5000, 10000], workFunction, [config]
+      [100], workFunction, [config]
     );
 
     job.on('accepted', () => {
@@ -52,11 +53,12 @@ async function main(dcp, imagePath = './img.png') {
     });
 
     job.requires('./single-frame');
-    job.computeGroups = [{ joinKey: 'wyld-stallyns', joinSecret: 'QmUgZXhjZWxsZW50IHRvIGVhY2ggb3RoZXIK', }];
+    // job.computeGroups = [{ joinKey: '', joinSecret: '', }];
     job.public.name = "buddhabrot generation";
     const ks = await wallet.get();
     job.setPaymentAccountKeystore(ks);
-    let results = await job.exec();
+
+    let results = await job.localExec();
     results = Array.from(results);
 
     for (let i = 0; i < results.length; i++) {
@@ -64,6 +66,7 @@ async function main(dcp, imagePath = './img.png') {
       saveFrame(results[i], `./img/img${i}.png`);
     }
   } else {
+    // Not running on dcp, create a single frame based off the config specs
     createAndSaveFrame(config, imagePath);
   }
 }

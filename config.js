@@ -17,7 +17,6 @@
  * @property {number} calculationAccuracy - accuracy to calculate the image at - how many segments to cut an integer value into to compute
  * @property {object} setDimensions - how far in each direction to compute in real and complex axes.
  * @property {Boolean} [dcp] - if the generation is done using DCP
- * @property {function(number, number):number[]} colorFunc - function to color each pixel based off visits to it.
  */
 
 /**
@@ -41,11 +40,5 @@ exports.init = function init() {
     // (setDimensions[direction] * calculationAccuracy) is the number of starting points
     // that will be calculated, spaced evenly across the set.
     calculationAccuracy: 600,
-    colorFunc: function colorFunc(visits, mostVisits) {
-      return [
-        visits / mostVisits * 255,
-        visits / mostVisits * 255,
-        0];
-    },
   };
 };

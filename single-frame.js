@@ -41,7 +41,15 @@ exports.createFrame = function createFrame(config) {
     return Math.max(a, b);
   });
 
-  const uint8Array = processCountsToColor(flatCleanedSet, width, height, countOfMostVisits, config.colorFunc);
+  // Needs to be updated to work better with higher iterations of the set.
+  const colorFunc = function colorFunc(visits, mostVisits) {
+    return [
+      visits / mostVisits * 255,
+      visits / mostVisits * 255,
+      0];
+  };
+
+  const uint8Array = processCountsToColor(flatCleanedSet, width, height, countOfMostVisits, colorFunc);
 
   return {
     set: uint8Array,
@@ -50,18 +58,25 @@ exports.createFrame = function createFrame(config) {
   };
 };
 
+/**
+ * Save the generated image
+ * @param {object} frameData - width, height, and color values for the image
+ * @param {string} imagePath - path to save the image
+ */
 exports.saveFrame = function saveFrame(frameData, imagePath) {
   const { width, height, set, } = frameData;
+  // use npm canvas to create a display for the results
   const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');
-
   const imgData = context.createImageData(width, height);
+
+  // pass the image data from the work function into the imgData for the canvas
   for (let i = 0; i < set.length; i++) {
     imgData.data[i] = set[i];
   }
 
+  // save the image to a file
   context.putImageData(imgData, 0, 0);
-
   const buffer = canvas.toBuffer('image/png');
   fs.writeFileSync(imagePath, buffer);
 };

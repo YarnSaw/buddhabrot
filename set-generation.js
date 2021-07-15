@@ -30,6 +30,13 @@ function calculatePath(startPoint, config) {
   const escapeDistanceSquared = escapeDistance ** 2;
 
   for (let i = 0; i < iterations; i++) {
+    // Mandelbrot function:
+    // c = starting value in the complex plane
+    // z = c
+    // z = z ** 2 + c
+    // Repeat that step ad infinitum
+    // If the point doesn't go towards infinity, it is in the mandelbrot set.
+    // The buddhabrot set is the escape paths of all points that do go towards infinity.
     realValueNew = realValue ** 2 - complexValue ** 2;
     complexValue = 2 * realValue * complexValue + startPoint[1];
     realValue = realValueNew + startPoint[0];
@@ -44,6 +51,7 @@ function calculatePath(startPoint, config) {
   // eslint-disable-next-line no-useless-return
   return;
 }
+
 /**
  * Calculates the escape paths of all points as defined in the buddhabrot config.
  * @param {config} config
@@ -82,6 +90,8 @@ exports.cleanupSet = function cleanPoints(allPoints, config) {
   const imagePointOccurances = new Array(height).fill().map(() => Array(width).fill(0));
 
   for (const point of allPoints) {
+    // It's possible for a point to fall in the range between the screens view and the escape
+    // Distance, so filter those out
     if ( true
       && point[0] > setDimensions.left
       && point[0] < setDimensions.right
@@ -95,6 +105,15 @@ exports.cleanupSet = function cleanPoints(allPoints, config) {
   return imagePointOccurances;
 };
 
+/**
+ * Take the set of all points and convert them into the image to be rendered
+ * @param {number[]} cleanedSet - clean and processed set of integers to be processed for their coloring
+ * @param {number} width - width of the image
+ * @param {number} height - height of the image
+ * @param {number} mostVisits - value at most visited pixel
+ * @param {function(number, number):number[]} colorFunc - function to color each pixel based off visits to it.
+ * @returns Uint8ClampedArray that is the full image
+ */
 exports.processCountsToColor = function processCountsToColor(cleanedSet, width, height, mostVisits, colorFunc) {
   const uint8Array = new Uint8ClampedArray(width * height * 4);
   for (let i = 0; i < width * height; i++) {
