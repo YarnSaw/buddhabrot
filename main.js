@@ -20,7 +20,7 @@ const config = require('./config.js').init();
 const { createAndSaveFrame, } = require('./single-frame.js');
 
 async function main(dcp, imagePath = './img.png') {
-  if (dcp) {
+  if (dcp.DCP) {
     await require('dcp-client').init();
     // @ts-ignore
     const compute = require('dcp/compute');
@@ -58,7 +58,13 @@ async function main(dcp, imagePath = './img.png') {
     const ks = await wallet.get();
     job.setPaymentAccountKeystore(ks);
 
-    let results = await job.localExec();
+    let results;
+    if (dcp.DCP_LOCALEXEC) {
+      results = await job.localExec();
+    } else {
+      results = await job.exec();
+    }
+
     results = Array.from(results);
 
     for (let i = 0; i < results.length; i++) {
@@ -72,4 +78,7 @@ async function main(dcp, imagePath = './img.png') {
 }
 
 const DCP = process.env.DCP === 'y';
-main(DCP);
+const DCP_LOCALEXEC = process.env.DCP_LOCALEXEC === 'y';
+const settings = { DCP, DCP_LOCALEXEC, };
+
+main(settings);
