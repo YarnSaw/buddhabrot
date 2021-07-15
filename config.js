@@ -37,7 +37,7 @@ exports.init = function init() {
     escapeDistance: 3,
     iterations: 100,
     // calculationAccuracy is how much the image is subdivided in calculations. Larger = more subdivisions
-    calculationAccuracy: 600,
+    calculationAccuracy: 300,
     imageScaleup: 300,
   };
 };
