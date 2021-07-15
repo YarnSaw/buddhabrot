@@ -28,7 +28,6 @@
  */
 exports.init = function init() {
   return {
-    imageScaleup: 300,
     setDimensions: {
       up: 1.1,
       down: -1.1,
@@ -37,8 +36,8 @@ exports.init = function init() {
     },
     escapeDistance: 3,
     iterations: 100,
-    // (setDimensions[direction] * calculationAccuracy) is the number of starting points
-    // that will be calculated, spaced evenly across the set.
+    // calculationAccuracy is how much the image is subdivided in calculations. Larger = more subdivisions
     calculationAccuracy: 600,
+    imageScaleup: 300,
   };
 };
