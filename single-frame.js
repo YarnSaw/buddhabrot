@@ -62,8 +62,10 @@ exports.createFrame = function createFrame(config) {
  * Save the generated image
  * @param {object} frameData - width, height, and color values for the image
  * @param {string} imagePath - path to save the image
+ * @param {*} [encoder] - encoder for gif
+ * @param {object} [settings] - environment settings
  */
-exports.saveFrame = function saveFrame(frameData, imagePath) {
+exports.saveFrame = function saveFrame(frameData, imagePath, encoder, settings) {
   const { width, height, set, } = frameData;
   // use npm canvas to create a display for the results
   const canvas = createCanvas(width, height);
@@ -74,11 +76,15 @@ exports.saveFrame = function saveFrame(frameData, imagePath) {
   for (let i = 0; i < set.length; i++) {
     imgData.data[i] = set[i];
   }
-
-  // save the image to a file
+  // save the image to a file and add it to the gif (if applicable)
   context.putImageData(imgData, 0, 0);
-  const buffer = canvas.toBuffer('image/png');
-  fs.writeFileSync(imagePath, buffer);
+  if (encoder) {
+    encoder.addFrame(context);
+  }
+  if (settings && settings.SAVE_IMAGES) {
+    const buffer = canvas.toBuffer('image/png');
+    fs.writeFileSync(imagePath, buffer);
+  }
 };
 
 exports.createAndSaveFrame = function createAndSaveFrame(config, imagePath) {

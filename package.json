@@ -21,7 +21,8 @@
     "dcp-client": "^4.1.0",
     "dcp-worker": "^3.1.0",
     "dotenv": "^10.0.0",
-    "fs": "0.0.1-security"
+    "fs": "0.0.1-security",
+    "gifencoder": "^2.0.1"
   },
   "devDependencies": {
     "eslint": "^7.30.0",

@@ -36,7 +36,7 @@ async function main(dcp, imagePath = './img.png') {
 
     // The range for work will decide the number of iterations that will be computed in each slice
     const job = compute.for(
-      [100], workFunction, [config]
+      1, 100, workFunction, [config]
     );
 
     job.on('accepted', () => {
@@ -53,7 +53,7 @@ async function main(dcp, imagePath = './img.png') {
     });
 
     job.requires('./single-frame');
-    // job.computeGroups = [{ joinKey: '', joinSecret: '', }];
+    job.computeGroups = [{ joinKey: 'wyld-stallyns', joinSecret: 'QmUgZXhjZWxsZW50IHRvIGVhY2ggb3RoZXIK', }];
     job.public.name = "buddhabrot generation";
     const ks = await wallet.get();
     job.setPaymentAccountKeystore(ks);
@@ -67,9 +67,13 @@ async function main(dcp, imagePath = './img.png') {
 
     results = Array.from(results);
 
-    for (let i = 0; i < results.length; i++) {
-      const { saveFrame, } = require('./single-frame.js');
-      saveFrame(results[i], `./img/img${i}.png`);
+    if (settings.CREATE_GIF) {
+      createGif(results, settings);
+    } else {
+      for (let i = 0; i < results.length; i++) {
+        const { saveFrame, } = require('./single-frame.js');
+        saveFrame(results[i], `./img/img${i}.png`);
+      }
     }
   } else {
     // Not running on dcp, create a single frame based off the config specs
@@ -77,8 +81,31 @@ async function main(dcp, imagePath = './img.png') {
   }
 }
 
+/**
+ * Collate results into a gif and possibly also save individual images
+ * @param {object} results - aarray of results from many uses of createFrame
+ * @param {object} settings - environment settings
+ */
+function createGif(results, settings) {
+  const fs = require('fs');
+  const GIFEncoder = require('gifencoder');
+  const encoder = new GIFEncoder(results[0].width, results[0].height);
+  encoder.createReadStream().pipe(fs.createWriteStream(settings.PATH_TO_GIF));
+  encoder.start();
+  encoder.setRepeat(0);
+  encoder.setDelay(200);
+  for (let i = 0; i < results.length; i++) {
+    const { saveFrame, } = require('./single-frame.js');
+    saveFrame(results[i], `./img/img${i}.png`, encoder, settings);
+  }
+  encoder.finish();
+}
+
 const DCP = process.env.DCP === 'y';
 const DCP_LOCALEXEC = process.env.DCP_LOCALEXEC === 'y';
-const settings = { DCP, DCP_LOCALEXEC, };
+const CREATE_GIF = process.env.CREATE_GIF === 'y';
+const PATH_TO_GIF = process.env.PATH_TO_GIF;
+const SAVE_IMAGES = process.env.SAVE_IMAGES === 'y';
+const settings = { DCP, DCP_LOCALEXEC, CREATE_GIF, PATH_TO_GIF, SAVE_IMAGES, };
 
 main(settings);
