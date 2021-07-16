@@ -85,8 +85,8 @@ exports.generateAllPoints = function findAllPaths(config) {
  */
 exports.cleanupSet = function cleanPoints(allPoints, config) {
   const { imageScaleup, setDimensions, } = config;
-  const width = imageScaleup * (setDimensions.right - setDimensions.left) + 1;
-  const height = imageScaleup * (setDimensions.up - setDimensions.down) + 1;
+  const width = Math.floor(imageScaleup * (setDimensions.right - setDimensions.left) + 1);
+  const height = Math.floor(imageScaleup * (setDimensions.up - setDimensions.down) + 1);
   const imagePointOccurances = new Array(height).fill().map(() => Array(width).fill(0));
 
   for (const point of allPoints) {
