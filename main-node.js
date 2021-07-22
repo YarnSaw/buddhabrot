@@ -55,7 +55,7 @@ async function main(settings, imagePath = './img.png') {
     });
 
     job.requires('./single-frame');
-    job.computeGroups = [{ joinKey: 'wyld-stallyns', joinSecret: 'QmUgZXhjZWxsZW50IHRvIGVhY2ggb3RoZXIK', }];
+    job.computeGroups = [{ joinKey: '', joinSecret: '', }];
     job.public.name = "buddhabrot generation";
     const ks = await wallet.get();
     job.setPaymentAccountKeystore(ks);
