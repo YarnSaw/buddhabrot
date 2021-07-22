@@ -19,10 +19,10 @@ const settings = require('./settings').init();
 /** @type {config} */
 const config = require('./config.js').init();
 
-const { createAndSaveFrame, } = require('./single-frame.js');
+const { createAndSaveFrame, saveFrame, } = require('./single-frame.js');
 
-async function main(dcp, imagePath = './img.png') {
-  if (dcp.DCP) {
+async function main(settings, imagePath = './img.png') {
+  if (settings.DCP) {
     await require('dcp-client').init();
     // @ts-ignore
     const compute = require('dcp/compute');
@@ -61,7 +61,7 @@ async function main(dcp, imagePath = './img.png') {
     job.setPaymentAccountKeystore(ks);
 
     let results;
-    if (dcp.DCP_LOCALEXEC) {
+    if (settings.DCP_LOCALEXEC) {
       results = await job.localExec();
     } else {
       results = await job.exec(0.0001);
@@ -73,7 +73,6 @@ async function main(dcp, imagePath = './img.png') {
       createGif(results, settings);
     } else {
       for (let i = 0; i < results.length; i++) {
-        const { saveFrame, } = require('./single-frame.js');
         saveFrame(results[i], `./img/img${i}.png`);
       }
     }
@@ -97,7 +96,6 @@ function createGif(results, settings) {
   encoder.setRepeat(0);
   encoder.setDelay(200);
   for (let i = 0; i < results.length; i++) {
-    const { saveFrame, } = require('./single-frame.js');
     saveFrame(results[i], `./img/img${i}.png`, encoder, settings);
   }
   encoder.finish();
