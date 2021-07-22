@@ -8,11 +8,13 @@
 
 /**
  * @typedef {import('./config.js').config} config
+ * @typedef {import('./settings.js').settings} settings
  */
 
 'use strict';
 
-require('dotenv').config();
+/** @type {settings} */
+const settings = require('./settings').init();
 
 /** @type {config} */
 const config = require('./config.js').init();
@@ -62,7 +64,7 @@ async function main(dcp, imagePath = './img.png') {
     if (dcp.DCP_LOCALEXEC) {
       results = await job.localExec();
     } else {
-      results = await job.exec();
+      results = await job.exec(0.0001);
     }
 
     results = Array.from(results);
@@ -100,12 +102,5 @@ function createGif(results, settings) {
   }
   encoder.finish();
 }
-
-const DCP = process.env.DCP === 'y';
-const DCP_LOCALEXEC = process.env.DCP_LOCALEXEC === 'y';
-const CREATE_GIF = process.env.CREATE_GIF === 'y';
-const PATH_TO_GIF = process.env.PATH_TO_GIF;
-const SAVE_IMAGES = process.env.SAVE_IMAGES === 'y';
-const settings = { DCP, DCP_LOCALEXEC, CREATE_GIF, PATH_TO_GIF, SAVE_IMAGES, };
 
 main(settings);
