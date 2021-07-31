@@ -13,7 +13,6 @@
 'use strict';
 
 const { createCanvas, } = require('canvas');
-const fs = require('fs');
 
 const { generateAllPoints, processCountsToColor, cleanupSet, } = require('./set-generation');
 
@@ -83,8 +82,24 @@ exports.saveFrame = function saveFrame(frameData, imagePath, encoder, settings) 
   }
   if (settings && settings.SAVE_IMAGES) {
     const buffer = canvas.toBuffer('image/png');
+    const fs = require('fs');
     fs.writeFileSync(imagePath, buffer);
   }
+};
+
+exports.displayFrame = function displayFrame(frameData) {
+  const { width, height, set, } = frameData;
+  // use npm canvas to create a display for the results
+  const canvas = document.getElementById('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const context = canvas.getContext('2d');
+  const imgData = context.createImageData(width, height);
+
+  for (let i = 0; i < set.length; i++) {
+    imgData.data[i] = set[i];
+  }
+  context.putImageData(imgData, 0, 0);
 };
 
 exports.createAndSaveFrame = function createAndSaveFrame(config, imagePath) {

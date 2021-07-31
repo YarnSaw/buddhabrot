@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Buddhabrot Generation</title>
+    <meta charset="UTF-8">
+    <script src="https://scheduler.distributed.computer/dcp-client/dcp-client.js"></script>
+    <script src="dist/index.min.js" defer></script>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <h1>
+      Generate the Buddhabrot
+    </h1>
+    <div>
+      <form id="form">
+        <div style="display: inline-block; width: 100%;">
+          <div class="dcpOptions categorySpace">
+            <div class="headerSpace">
+              <input type="checkbox" id="useDCP" name="useDCP">
+              <label for="useDCP" id="useDCPlabel"> Generate Image using DCP?</label>
+            </div>
+            <h3>
+              DCP Specific Options
+            </h3>
+            <div class="keystore optionGroup">
+              <label for="keystoreAddress" id="keystoreLabel" class="bottomPaddingSmall">Load your DCP keystore:</label>
+              <br>
+              <input type="file" id="keystoreFile" name="uploadKeystore">
+            </div>
+            <div class="localExec optionGroup">
+              <input type="checkbox" id="localExec" name="localExec">
+              <label for="localExec">Use localExec in DCP?</label>
+            </div>
+          </div>
+          <div class="buddhaOptions">
+            <h3>
+              BuddhaBrot Options
+            </h3>
+            <div class="escapeDistance optionGroup">
+              <label for="escapeDistance">Distance to be considered 'escaped':</label>
+              <br>
+              <input type="text" id="escapeDistance" name="escapeDistance">
+            </div>
+            <div class="iterations optionGroup">
+              <label for="iterationsSingle">Number of iterations to compute (overwritten if using DCP):</label>
+              <br>
+              <input type="text" id="iterationsSingle" name="iterationsSingle">
+            </div>
+            <div class="imageScaleup optionGroup">
+              <label for="imageScaleup">Scale the image up based of the set dimensions:</label>
+              <br>
+              <input type="text" id="imageScaleup" name="imageScaleup">
+            </div>
+            <div class="calcAcc optionGroup">
+              <p style="margin-bottom: 4px;">
+                Accuracy to calculate the buddhabrot set at. It is very highly recommended
+                <br>
+                that calculation accuracy be set to a multiple of imageScaleup for the best results.
+              </p>
+              <label for="calcAcc">Calculation Accuracy:</label>
+              <br>
+              <input type="text" id="calcAcc" name="calcAcc">
+            </div>
+            <div class="setDimensions" style="margin-top: 30px;">
+              <p style="margin-bottom: 4px;">
+                Set the dimensions for the plane the set will be calculated on. 
+                <br>
+                Up and right are positive values, down and left should be negative.
+              </p>
+              <div class="dimU dimensionSet optionGroup">
+                <label for="dimU">Up:</label>
+                <br>
+                <input type="text" id="dimU" name="dimU">
+              </div>
+              <div class="dimD dimensionSet optionGroup">
+                <label for="dimD">Down:</label>
+                <br>
+                <input type="text" id="dimD" name="dimD">
+              </div>
+              <div class="dimL dimensionSet optionGroup">
+                <label for="dimL">Left:</label>
+                <br>
+                <input type="text" id="dimL" name="dimL">
+              </div>
+              <div class="dimR dimensionSet optionGroup">
+                <label for="dimR">Right:</label>
+                <br>
+                <input type="text" id="dimR" name="dimR">
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="text-align: center; margin-top: 40px;">
+          <input type="submit" id="submit">
+        </div>
+      </form>
+    </div>
+    <div class="canvasDiv">
+      <canvas id="canvas" width="1000" height="1000"></canvas>
+    </div>
+  </body>
+</html>
