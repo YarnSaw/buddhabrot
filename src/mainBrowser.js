@@ -16,7 +16,7 @@ function generateImage(ev) {
       right: parseFloat(elements.dimR.value) ? parseFloat(elements.dimR.value) : 0.75,
     },
     escapeDistance: parseFloat(elements.escapeDistance.value) ? parseFloat(elements.escapeDistance.value) : 3,
-    iterations: parseFloat(elements.iterationsSingle.value) ? parseFloat(elements.iterations.value) : 100,
+    iterations: parseFloat(elements.iterationsSingle.value) ? parseFloat(elements.iterationsSingle.value) : 100,
     calculationAccuracy: parseFloat(elements.calcAcc.value) ? parseFloat(elements.calcAcc.value) : 300,
     imageScaleup: parseFloat(elements.imageScaleup.value) ? parseFloat(elements.imageScaleup.value) : 300,
   };
