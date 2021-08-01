@@ -5,7 +5,7 @@ const webpackConfig = {
   devServer: {
     contentBase: path.join(__dirname, "public"),
     disableHostCheck: true,
-    publicPath: '/dist',
+    publicPath: '/buddhabrot/dist',
     watchContentBase: true,
   },
   devtool: 'source-map',
@@ -14,7 +14,7 @@ const webpackConfig = {
   },
   output: {
     filename: '[name].min.js',
-    path: path.join(__dirname, 'public/dist'),
+    path: path.join(__dirname, 'public/buddhabrot/dist'),
     publicPath: '/',
     clean: true,
   },
