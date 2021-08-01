@@ -1,9 +1,21 @@
-/* globals dcp, keystore */
+/* globals dcp, keystore, generated */
 
 let keystore;
 let usingDCP, keystoreLoader, localExec;
 
+let generated = false;
 // eslint-disable-next-line no-unused-vars
+function downloadBrot(ev) {
+  if (!generated) {
+    if (!confirm("No image has been generated yet. Are you sure you wish to download the canvas image?")) {
+      ev.preventDefault();
+      return;
+    }
+  }
+  const img = document.getElementById('canvas').toDataURL("image/png");
+  document.getElementById('download').href = img;
+}
+
 function generateImage(ev) {
   ev.preventDefault();
   const elements = ev.target.elements;
@@ -38,6 +50,7 @@ function generateImage(ev) {
     const frame = createFrame(config);
     displayFrame(frame);
   }
+  generated = true;
 }
 function main() {
   const wallet = dcp.wallet; // DCP specific class - wallets
@@ -71,6 +84,7 @@ function main() {
   });
 
   document.getElementById('form').addEventListener('submit', generateImage);
+  document.getElementById('download').addEventListener('click', downloadBrot);
 }
 
 window.addEventListener('DOMContentLoaded', (ev) => {

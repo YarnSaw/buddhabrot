@@ -48,3 +48,9 @@ h1 {
   margin: 100px auto;
   text-align: center;
 }
+
+.download {
+  font-size: 20px;
+  text-align: center;
+  margin: 50px auto 100px;
+}
