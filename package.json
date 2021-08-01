@@ -2,10 +2,11 @@
   "name": "buddhabrot",
   "version": "1.0.0",
   "description": "",
-  "main": "public/index.html",
+  "main": "public/buddhabrot.html",
   "scripts": {
     "build": "webpack --mode=production --progress",
-    "dev": "webpack server --open --progress --mode=development"
+    "dev": "webpack server --open --progress --mode=development",
+    "deploy": "webpack --mode=production --progress && cp public/* /var/yarnsawe.dev/ -r"
   },
   "repository": {
     "type": "git",
