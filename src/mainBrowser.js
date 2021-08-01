@@ -16,8 +16,10 @@ function downloadBrot(ev) {
   document.getElementById('download').href = img;
 }
 
-function generateImage(ev) {
+async function generateImage(ev) {
   ev.preventDefault();
+  const { createFrame, displayFrame, } = require('./single-frame');
+
   const elements = ev.target.elements;
   // Set defaults if the values are set to non-float values.
   const config = {
@@ -43,10 +45,41 @@ function generateImage(ev) {
     };
 
     const job = compute.for(
-      1, 100, workFunction, [config]
+      1, 2, workFunction, [config]
     );
+
+    job.on('accepted', () => {
+      console.log(` - Job accepted by scheduler, waiting for results`);
+      console.log(` - Job has id ${job.id}`);
+    });
+
+    job.on('readystatechange', (arg) => {
+      console.log(`new ready state: ${arg}`);
+    });
+
+    job.on('result', (ev) => {
+      console.log("Got a result", ev.sliceNumber);
+    });
+
+    job.on(('error'), (ev) => {
+      console.log(ev);
+    });
+
+    job.requires('./single-frame');
+    job.computeGroups = [{ joinKey: 'wyld-stallyns', joinSecret: 'QmUgZXhjZWxsZW50IHRvIGVhY2ggb3RoZXIK', }];
+    job.public.name = "buddhabrot generation";
+    job.setPaymentAccountKeystore(keystore);
+
+    let results;
+    if (document.getElementById("localExec").checked) {
+      results = await job.localExec();
+    } else {
+      results = await job.exec(compute.marketValue);
+    }
+
+    results = Array.from(results);
+    displayFrame(results[0]);
   } else {
-    const { createFrame, displayFrame, } = require('./single-frame');
     const frame = createFrame(config);
     displayFrame(frame);
   }
@@ -67,11 +100,11 @@ function main() {
   usingDCP.addEventListener('change', (ev) => {
     if (usingDCP.checked) {
       for (const setting of DCPSettings) {
-        setting.disabled = true;
+        setting.disabled = false;
       }
     } else {
       for (const setting of DCPSettings) {
-        setting.disabled = false;
+        setting.disabled = true;
       }
     }
   });
