@@ -66,7 +66,7 @@ async function generateImage(ev) {
     });
 
     job.requires('./single-frame');
-    job.computeGroups = [{ joinKey: 'wyld-stallyns', joinSecret: 'QmUgZXhjZWxsZW50IHRvIGVhY2ggb3RoZXIK', }];
+    // job.computeGroups = [{ joinKey: '', joinSecret: '', }];
     job.public.name = "buddhabrot generation";
     job.setPaymentAccountKeystore(keystore);
 
