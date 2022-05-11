@@ -13,6 +13,8 @@
 
 'use strict';
 
+module.declare([], function(require, exports, modules) {
+
 /**
  * Calculates if a given point is in the mandelbrot, and if it isn't
  * will return the escape path.
@@ -125,3 +127,5 @@ exports.processCountsToColor = function processCountsToColor(cleanedSet, width, 
   }
   return uint8Array;
 };
+
+})

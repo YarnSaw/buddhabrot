@@ -3,10 +3,9 @@ const path = require('path')//import path from "path";
 /** @type {import('webpack').Configuration} */
 const webpackConfig = {
   devServer: {
-    contentBase: path.join(__dirname, "public"),
-    disableHostCheck: true,
-    publicPath: '/buddhabrot/dist',
-    watchContentBase: true,
+    static: path.join(__dirname, "public"),
+    allowedHosts: 'all',
+    // publicPath: '/buddhabrot/dist',
   },
   devtool: 'source-map',
   entry: {

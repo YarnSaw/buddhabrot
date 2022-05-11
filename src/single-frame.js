@@ -12,7 +12,8 @@
 
 'use strict';
 
-const { createCanvas, } = require('canvas');
+module.declare(['./set-generation'], function(require, exports, modules) {
+
 
 const { generateAllPoints, processCountsToColor, cleanupSet, } = require('./set-generation');
 
@@ -66,6 +67,8 @@ exports.createFrame = function createFrame(config) {
  */
 exports.saveFrame = function saveFrame(frameData, imagePath, encoder, settings) {
   const { width, height, set, } = frameData;
+  const { createCanvas, } = require('canvas');
+
   // use npm canvas to create a display for the results
   const canvas = createCanvas(width, height);
   const context = canvas.getContext('2d');
@@ -107,3 +110,5 @@ exports.createAndSaveFrame = function createAndSaveFrame(config, imagePath) {
 
   exports.saveFrame(frameData, imagePath);
 };
+
+});

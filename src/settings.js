@@ -25,7 +25,7 @@
  */
 exports.init = function init() {
   return {
-    DCP: true,
+    DCP: false,
     DCP_LOCALEXEC: true,
     CREATE_GIF: true,
     PATH_TO_GIF: 'img/buddhabrot.gif',
