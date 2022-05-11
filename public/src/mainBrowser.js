@@ -1,3 +1,8 @@
+
+// @ts-ignore
+module.declare(['./src/single-frame'], function(require, exports, modules) {
+
+
 /* globals dcp, keystore, generated */
 
 let keystore;
@@ -18,7 +23,7 @@ function downloadBrot(ev) {
 
 async function generateImage(ev) {
   ev.preventDefault();
-  const { createFrame, displayFrame, } = require('./single-frame');
+  const { createFrame, displayFrame, } = require('./src/single-frame');
 
   const elements = ev.target.elements;
   // Set defaults if the values are set to non-float values.
@@ -120,6 +125,11 @@ function main() {
   document.getElementById('download').addEventListener('click', downloadBrot);
 }
 
-window.addEventListener('DOMContentLoaded', (ev) => {
+if (['interactive', 'complete'].includes(document.readyState))
   main();
+else
+  window.addEventListener('DOMContentLoaded', (ev) => {
+    main();
+  });
+
 });
