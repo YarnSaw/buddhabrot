@@ -27,10 +27,7 @@
     "dcp-client": "^4.2.3",
     "dcp-util": "^2.2.3",
     "dcp-worker": "^3.2.3",
-    "gifencoder": "^2.0.1",
-    "webpack": "^5.72.1",
-    "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^4.9.0"
+    "gifencoder": "^2.0.1"
   },
   "devDependencies": {
     "eslint": "^7.30.0",
