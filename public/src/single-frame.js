@@ -12,6 +12,7 @@
 
 'use strict';
 
+// @ts-ignore
 module.declare(['./set-generation'], function(require, exports, modules) {
 
 
@@ -33,29 +34,53 @@ exports.createFrame = function createFrame(config) {
   const cleanedSet = cleanupSet(setPoints, config);
   const width = cleanedSet[0].length;
   const height = cleanedSet.length;
-  const flatCleanedSet = cleanedSet.flat();
+  let flatCleanedSet = cleanedSet.flat();
 
-  // Need to get the most visited so we can scale image brightness accordingly
-  // console.log(cleanedSet.length, cleanedSet[0].length)
+  if (config.smoothingKernel)
+  {
+    const smoothedFlatCleanSet = new Array(flatCleanedSet.length).fill(0);
+    const map = [-1, 1, width, -width, width + 1, width - 1, -width + 1, -width - 1 ];
+    for (let index = 0; index < flatCleanedSet.length; index++)
+    {
+      let newVisits = 0
+      if ( index%width  == 0
+        || index%width  == width - 1
+        || index - width < 0
+        || index + width > flatCleanedSet.length)
+        continue;
+      for (let [i, elem] of map.entries())
+      {
+        newVisits += flatCleanedSet[index + elem] * config.smoothingKernel[Math.floor(i/3)][i%3];
+      }
+      smoothedFlatCleanSet[index] = newVisits;
+    }
+    flatCleanedSet = smoothedFlatCleanSet;
+  }
+
   const countOfMostVisits = flatCleanedSet.reduce(function(a, b) {
     return Math.max(a, b);
   });
 
-  // Needs to be updated to work better with higher iterations of the set.
-  const colorFunc = function colorFunc(visits, mostVisits) {
-    return [
-      visits / mostVisits * 255,
-      visits / mostVisits * 255,
-      0];
-  };
+  if (config.colorImage)
+  {
+    console.log("hey")
+    // Ensure the color func is a function. May need to be a string to get past serialization in a worker.
+    if (typeof config.colorFunction === 'string')
+      config.colorFunction = eval(config.colorFunction)
+    // @ts-ignore
+    const uint8Array = processCountsToColor(flatCleanedSet, width, height, countOfMostVisits, config.colorFunction);
 
-  const uint8Array = processCountsToColor(flatCleanedSet, width, height, countOfMostVisits, colorFunc);
-
+    return {
+      set: uint8Array,
+      width,
+      height,
+    };
+  }
   return {
-    set: uint8Array,
+    set: flatCleanedSet,
     width,
     height,
-  };
+  }
 };
 
 /**
@@ -94,8 +119,11 @@ exports.displayFrame = function displayFrame(frameData) {
   const { width, height, set, } = frameData;
   // use npm canvas to create a display for the results
   const canvas = document.getElementById('canvas');
+  // @ts-ignore
   canvas.width = width;
+  // @ts-ignore
   canvas.height = height;
+  // @ts-ignore
   const context = canvas.getContext('2d');
   const imgData = context.createImageData(width, height);
 

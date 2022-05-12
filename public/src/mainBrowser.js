@@ -1,6 +1,6 @@
 
 // @ts-ignore
-module.declare(['./src/single-frame'], function(require, exports, modules) {
+module.declare(['./src/single-frame', './src/config'], function(require, exports, modules) {
 
 
 /* globals dcp, keystore, generated */
@@ -24,10 +24,12 @@ function downloadBrot(ev) {
 async function generateImage(ev) {
   ev.preventDefault();
   const { createFrame, displayFrame, } = require('./src/single-frame');
+  const defaultConfig = require('./src/config').init()
 
   const elements = ev.target.elements;
   // Set defaults if the values are set to non-float values.
   const config = {
+    ...defaultConfig,
     setDimensions: {
       up: parseFloat(elements.dimU.value) ? parseFloat(elements.dimU.value) : 1.1,
       down: parseFloat(elements.dimD.value) ? parseFloat(elements.dimD.value) : -1.1,
@@ -86,6 +88,7 @@ async function generateImage(ev) {
     displayFrame(results[0]);
   } else {
     const frame = createFrame(config);
+    console.log("here")
     displayFrame(frame);
   }
   generated = true;
