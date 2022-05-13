@@ -6,7 +6,6 @@ module.declare(['./src/single-frame', './src/config'], function(require, exports
 /* globals dcp, keystore, generated */
 
 let keystore;
-let usingDCP, keystoreLoader, localExec;
 
 let generated = false;
 // eslint-disable-next-line no-unused-vars
@@ -27,6 +26,24 @@ async function generateImage(ev) {
   const defaultConfig = require('./src/config').init()
 
   const elements = ev.target.elements;
+
+  if (elements.ownColorFunc.checked)
+  {
+    try
+    {
+      let func = eval(elements.colorFunction.value);
+      func(1,10);
+    }
+    catch(e)
+    {
+      alert("There is a problem with your custom function, it doesn't evaluate / run properly.\nPlease ensure it takes 2 integer inputs: visits and mostVisits, and is a valid function.\nWill not run generation.");
+      elements.colorFunction.disabled = true;
+      elements.customColorFunc.checked
+      elements.colorFunction.value = elements.colorFunction.textContent;
+      return;
+    }
+  }
+
   // Set defaults if the values are set to non-float values.
   const config = {
     ...defaultConfig,
@@ -40,9 +57,14 @@ async function generateImage(ev) {
     iterations: parseFloat(elements.iterationsSingle.value) ? parseFloat(elements.iterationsSingle.value) : 100,
     calculationAccuracy: parseFloat(elements.calcAcc.value) ? parseFloat(elements.calcAcc.value) : 300,
     imageScaleup: parseFloat(elements.imageScaleup.value) ? parseFloat(elements.imageScaleup.value) : 300,
+    colorFunction: eval(elements.colorFunction.value),
   };
 
-  if (usingDCP.checked) {
+  if (!elements.useSmoothing.checked)
+    delete config.smoothingKernel;
+
+  if (document.getElementById("useDCP").checked)
+  {
     const compute = dcp.compute;
     const workFunction = function work(iter, config) {
       config.iterations = iter;
@@ -86,9 +108,10 @@ async function generateImage(ev) {
 
     results = Array.from(results);
     displayFrame(results[0]);
-  } else {
+  }
+  else 
+  {
     const frame = createFrame(config);
-    console.log("here")
     displayFrame(frame);
   }
   generated = true;
@@ -96,32 +119,35 @@ async function generateImage(ev) {
 function main() {
   const wallet = dcp.wallet; // DCP specific class - wallets
 
-  usingDCP = document.getElementById("useDCP");
-
-  const DCPSettings = [];
-  const keystoreLoaderLabel = document.getElementById("keystoreLabel");
-  keystoreLoader = document.getElementById("keystoreFile");
-  DCPSettings.push(keystoreLoader);
-  localExec = document.getElementById('localExec');
-  DCPSettings.push(localExec);
-
-  usingDCP.addEventListener('change', (ev) => {
-    if (usingDCP.checked) {
-      for (const setting of DCPSettings) {
-        setting.disabled = false;
-      }
-    } else {
-      for (const setting of DCPSettings) {
-        setting.disabled = true;
-      }
-    }
-  });
   // Set keystore when selected and remove the upload button
+  const keystoreLoaderLabel = document.getElementById("keystoreLabel");
+  const keystoreLoader = document.getElementById("keystoreFile");
   keystoreLoader.addEventListener('click', async(ev) => {
     ev.preventDefault();
     keystore = await wallet.get();
     keystoreLoader.style.display = 'none';
     keystoreLoaderLabel.style.display = 'none';
+  });
+
+  // When new function for color is defined, verify the function will actually work and alert if it won't
+  const colorFunction = document.getElementById("colorFunction");
+  colorFunction.addEventListener('focusout', async(ev) => {
+    try
+    {
+      let func = eval(colorFunction.value);
+      func(1,10);
+    }
+    catch(e)
+    {
+      alert("There is a problem with your custom function, it doesn't evaluate/ run properly.\nPlease ensure it takes 2 integer inputs: visits and mostVisits, and is a valid function.");
+    }
+  });
+
+  // Enable and disable custom color func box by checkbox
+  const customColorFunc = document.getElementById("ownColorFunc");
+  customColorFunc.addEventListener('click', async(ev) => {
+    colorFunction.disabled = !customColorFunc.checked;
+    colorFunction.value = colorFunction.textContent;
   });
 
   document.getElementById('form').addEventListener('submit', generateImage);
