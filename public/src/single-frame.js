@@ -63,7 +63,6 @@ exports.createFrame = function createFrame(config) {
 
   if (config.colorImage)
   {
-    console.log("hey")
     // Ensure the color func is a function. May need to be a string to get past serialization in a worker.
     if (typeof config.colorFunction === 'string')
       config.colorFunction = eval(config.colorFunction)
