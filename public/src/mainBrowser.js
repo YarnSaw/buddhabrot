@@ -65,16 +65,28 @@ async function generateImage(ev) {
 
   if (document.getElementById("useDCP").checked)
   {
+
+    // Ensure keystore is loaded
+    if (!keystore)
+    {
+      keystore = await dcp.wallet.get();
+      document.getElementById("keystoreLabel").style.display = 'none';
+      document.getElementById("keystoreFile").style.display = 'none';
+    }
+
+    // Can't pass functions over dcp, so need to stringify colorFunction
+    config.colorFunction = config.colorFunction.toString();
+
     const compute = dcp.compute;
     const workFunction = function work(iter, config) {
       config.iterations = iter;
       config.dcp = true;
-      const { createFrame, } = require('./single-frame');
+      const { createFrame, } = require('single-frame.js');
       return createFrame(config);
     };
 
     const job = compute.for(
-      1, 2, workFunction, [config]
+      [100], workFunction, [config]
     );
 
     job.on('accepted', () => {
@@ -94,7 +106,7 @@ async function generateImage(ev) {
       console.log(ev);
     });
 
-    job.requires('./single-frame');
+    job.requires(['buddhabrot_yarn/single-frame.js']);
     // job.computeGroups = [{ joinKey: '', joinSecret: '', }];
     job.public.name = "buddhabrot generation";
     job.setPaymentAccountKeystore(keystore);
