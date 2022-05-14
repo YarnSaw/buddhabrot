@@ -1,6 +1,6 @@
 
 // @ts-ignore
-module.declare(['./src/single-frame', './src/config'], function(require, exports, modules) {
+module.declare(['./src/single-frame', './src/config', './src/set-generation'], function(require, exports, modules) {
 
 
 /* globals dcp, keystore, generated */
@@ -75,7 +75,7 @@ async function generateImage(ev) {
     }
 
     // Can't pass functions over dcp, so need to stringify colorFunction
-    config.colorFunction = config.colorFunction.toString();
+    // config.colorFunction = config.colorFunction.toString();
 
     const compute = dcp.compute;
     const workFunction = function work(iter, config) {
@@ -85,6 +85,7 @@ async function generateImage(ev) {
       return createFrame(config);
     };
 
+    config.colorImage = false;
     const job = compute.for(
       [100], workFunction, [config]
     );
@@ -107,7 +108,7 @@ async function generateImage(ev) {
     });
 
     job.requires(['buddhabrot_yarn/single-frame.js']);
-    // job.computeGroups = [{ joinKey: '', joinSecret: '', }];
+    job.computeGroups = [{ joinKey: 'demo', joinSecret: 'dcp', }];
     job.public.name = "buddhabrot generation";
     job.setPaymentAccountKeystore(keystore);
 
@@ -119,7 +120,9 @@ async function generateImage(ev) {
     }
 
     results = Array.from(results);
-    displayFrame(results[0]);
+    const { processCountsToColor } = require('./src/set-generation');
+    const uint8Array = processCountsToColor(results[0].set, results[0].width, results[0].height, results[0].countOfMostVisits, config.colorFunction);
+    displayFrame({set: uint8Array, width: results[0].width, height: results[0].height});
   }
   else 
   {

@@ -79,6 +79,7 @@ exports.createFrame = function createFrame(config) {
     set: flatCleanedSet,
     width,
     height,
+    countOfMostVisits,
   }
 };
 
