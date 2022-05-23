@@ -21,6 +21,7 @@ module.declare([], function(require, exports, modules) {
  * @property {Boolean} colorImage -  if true, color the image while creating it, else return raw point values for pixels in the image 
  * @property {Boolean} [dcp] - if the generation is done using DCP
  * @property {number[][]} [smoothingKernel] - 3x3 matrix that may be supplied to smooth the image after generation (recommended is all values being 1/9)
+ * @property {Boolean} [asyncGen] - have async operations within the buddhabrot generation, for local generation.
  * @property {string|function} colorFunction - function to use to color the image
  *    @param {number} visits - how often this pixel to be colored has been visited
  *    @param {number} mostVisits - number of times the most visited pixel was visited
@@ -62,6 +63,7 @@ exports.init = function init() {
       [1/9,1/9,1/9],
       [1/9,1/9,1/9]
     ],
+    asyncGen: true,
     
   };
 };

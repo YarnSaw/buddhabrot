@@ -107,6 +107,15 @@
                 <input type="checkbox" id="localExec" name="localExec">
                 <label for="localExec">Use localExec in DCP?</label>
               </div>
+              <div class="mb-3">
+                <h4 class="mb-1">To add your job to a compute group, enter it's joinKey and joinSecret below</h4>
+                <label for="joinKey">Join Key:</label>
+                <input class="ml-3" type="input" id="joinKey" name="joinKey">
+                <br>
+                <label for="joinSecret">Join Secret:</label>
+                <input type="input" id="joinSecret" name="joinSecret">
+
+              </div>
               <p>Currently only single-frame generation is available on DCP.
                 <br>
                 Is that kinda pointless? Yes, but it's a work in progress. GIFs are weird.
@@ -114,7 +123,7 @@
             </div>
           </div>
         </div>
-        <div class="row justify-content-md-center text-center my-5 py-5">
+        <div class="row justify-content-md-center text-center my-5">
           <div class="col-sm-2 my-auto">
             <input type="checkbox" id="useDCP" name="useDCP">
             <label for="useDCP" id="useDCPlabel"> Generate Image using DCP?</label>              
@@ -122,11 +131,20 @@
           <div class="col-sm-2 my-auto">
             <input type="submit" id="submit" value="Create Image">
           </div>
-          <div class="col-sm-2 download my-auto">
+          <div class="col-sm-2 download">
             <a id="download" href="" download="gif.png"> Download</a>
           </div>
         </div>
       </form>
+      <div class="row justify-content-md-center text-center my-3">
+        <div class="col-sm-2">
+          <p id="DCPstatus"></p>
+          <p id="generatingIndicator"></p>
+        </div>
+        <div class="col-sm-2">
+          <p id="DCPresults"></p>
+        </div>
+      </div>
     </div>
     <div class="canvasDiv">
       <canvas id="canvas" width="1000" height="1000"></canvas>

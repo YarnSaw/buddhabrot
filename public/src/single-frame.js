@@ -23,9 +23,9 @@ const { generateAllPoints, processCountsToColor, cleanupSet, } = require('./set-
  * @param {config} config - buddhabrot config
  * @returns features needed to create the buddhabrot image
  */
-exports.createFrame = function createFrame(config) {
+exports.createFrame = async function createFrame(config) {
   // Find all the points for the set.
-  const setPoints = generateAllPoints(config);
+  const setPoints = await generateAllPoints(config);
   if (config.dcp) {
     // @ts-ignore
     progress(); // eslint-disable-line no-undef

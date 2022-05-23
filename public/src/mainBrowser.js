@@ -85,6 +85,7 @@ async function generateImage(ev) {
       return createFrame(config);
     };
 
+    config.asyncGen = false;
     config.colorImage = false;
     const job = compute.for(
       [100], workFunction, [config]
@@ -96,10 +97,15 @@ async function generateImage(ev) {
     });
 
     job.on('readystatechange', (arg) => {
+      document.getElementById("DCPstatus").textContent = "Ready state of job: " + arg;
       console.log(`new ready state: ${arg}`);
     });
 
+    var resultsReceived = 0
+    document.getElementById("DCPresults").textContent = `Received ${resultsReceived} slices.`
     job.on('result', (ev) => {
+      resultsReceived++;
+      document.getElementById("DCPresults").textContent = `Received ${resultsReceived} slice(s).`
       console.log("Got a result", ev.sliceNumber);
     });
 
@@ -108,9 +114,13 @@ async function generateImage(ev) {
     });
 
     job.requires(['buddhabrot_yarn/single-frame.js']);
-    job.computeGroups = [{ joinKey: 'demo', joinSecret: 'dcp', }];
     job.public.name = "buddhabrot generation";
     job.setPaymentAccountKeystore(keystore);
+
+    if (elements.joinKey.value && elements.joinSecret.value)
+    {
+      job.computeGroups = [{ joinKey: elements.joinKey.value, joinSecret: elements.joinSecret.value }]
+    }
 
     let results;
     if (document.getElementById("localExec").checked) {
@@ -123,11 +133,20 @@ async function generateImage(ev) {
     const { processCountsToColor } = require('./src/set-generation');
     const uint8Array = processCountsToColor(results[0].set, results[0].width, results[0].height, results[0].countOfMostVisits, config.colorFunction);
     displayFrame({set: uint8Array, width: results[0].width, height: results[0].height});
+    document.getElementById("DCPresults").textContent = '';
+    document.getElementById("DCPstatus").textContent = '';
   }
   else 
   {
-    const frame = createFrame(config);
-    displayFrame(frame);
+    document.getElementById("generatingIndicator").textContent = "Generating Image Locally...";
+    
+    // Alow browser to update text before fully sync operation. In the future should probably use a web worker for this.
+    setTimeout(async () => {
+      const frame = await createFrame(config);
+      displayFrame(frame);
+      document.getElementById("generatingIndicator").textContent = "";
+    }, 10);
+    
   }
   generated = true;
 }
