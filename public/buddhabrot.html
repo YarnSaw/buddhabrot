@@ -77,6 +77,10 @@
           </div>
           <div class="col-sm-6">
             <div class="float-left">
+              <div class="optionGroup mb-3">
+                <input type="checkbox" id="asyncGen">
+                <label for="asyncGen">Use timers for an async generation (allows progress information, but slower)</label>
+              </div>
               <div class="mb-3">
                 <input type="checkbox" id="ownColorFunc" name="ownColorFunc">
                 <label for="ownColorFunc">Input own color function?</label>
@@ -143,6 +147,7 @@
         </div>
         <div class="col-sm-2">
           <p id="DCPresults"></p>
+          <p id="progress"></p>
         </div>
       </div>
     </div>

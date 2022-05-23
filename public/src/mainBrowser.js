@@ -58,6 +58,7 @@ async function generateImage(ev) {
     calculationAccuracy: parseFloat(elements.calcAcc.value) ? parseFloat(elements.calcAcc.value) : 300,
     imageScaleup: parseFloat(elements.imageScaleup.value) ? parseFloat(elements.imageScaleup.value) : 300,
     colorFunction: eval(elements.colorFunction.value),
+    asyncGen: elements.asyncGen.checked,
   };
 
   if (!elements.useSmoothing.checked)
@@ -145,6 +146,7 @@ async function generateImage(ev) {
       const frame = await createFrame(config);
       displayFrame(frame);
       document.getElementById("generatingIndicator").textContent = "";
+      document.getElementById('progress').textContent = "";
     }, 10);
     
   }
