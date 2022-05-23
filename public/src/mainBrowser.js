@@ -130,12 +130,20 @@ async function generateImage(ev) {
       results = await job.exec(compute.marketValue);
     }
 
-    results = Array.from(results);
     const { processCountsToColor } = require('./src/set-generation');
+
+    results = Array.from(results);
+    const processedResults = []
+    processedResults.push()
     const uint8Array = processCountsToColor(results[0].set, results[0].width, results[0].height, results[0].countOfMostVisits, config.colorFunction);
     displayFrame({set: uint8Array, width: results[0].width, height: results[0].height});
     document.getElementById("DCPresults").textContent = '';
     document.getElementById("DCPstatus").textContent = '';
+
+    // Display results as a gif
+    const encoder = new GIFEncoder();
+    encoder.setRepeat(0);
+    encoder.setDelay(500);
   }
   else 
   {
