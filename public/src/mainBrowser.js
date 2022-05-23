@@ -2,26 +2,61 @@
 // @ts-ignore
 module.declare(['./src/single-frame', './src/config', './src/set-generation'], function(require, exports, modules) {
 
-
 /* globals dcp, keystore, generated */
 
 let keystore;
 
 let generated = false;
+let dcpGenerated = false;
+let generating = false;
 // eslint-disable-next-line no-unused-vars
 function downloadBrot(ev) {
   if (!generated) {
-    if (!confirm("No image has been generated yet. Are you sure you wish to download the canvas image?")) {
-      ev.preventDefault();
-      return;
-    }
+    alert("No image has been generated yet. Cannot download")
+    ev.preventDefault();
+    return;
   }
-  const img = document.getElementById('canvas').toDataURL("image/png");
-  document.getElementById('download').href = img;
+  if (dcpGenerated)
+  {
+    ev.preventDefault();
+    window.encoder.download('download.gif');
+  }
+  else
+  {
+    const img = document.getElementById('canvasImg').toDataURL("image/png");
+    document.getElementById('download').href = img;
+  }
 }
 
 async function generateImage(ev) {
   ev.preventDefault();
+  if (generating)
+  {
+    alert("Cannot generate image when one is already being generated");
+    return;
+  }
+  
+  // Remove previously generated image
+  if (dcpGenerated)
+  {
+    const img = document.getElementById('dcpGenImg');
+    if (img && img.parentNode)
+      img.parentNode.removeChild(img);
+  }
+  else if (generated)
+  {
+    const img = document.getElementById('canvasImg');
+    if (img && img.parentNode)
+      img.parentNode.removeChild(img);
+  }
+
+  // Let browser remove previous image
+  await new Promise((resolve, reject) =>  setTimeout(() => resolve(), 10));
+
+  generating = true;
+  generated = false;
+  dcpGenerated = false;
+
   const { createFrame, displayFrame, } = require('./src/single-frame');
   const defaultConfig = require('./src/config').init()
 
@@ -66,7 +101,6 @@ async function generateImage(ev) {
 
   if (document.getElementById("useDCP").checked)
   {
-
     // Ensure keystore is loaded
     if (!keystore)
     {
@@ -133,17 +167,36 @@ async function generateImage(ev) {
     const { processCountsToColor } = require('./src/set-generation');
 
     results = Array.from(results);
+    const width = results[0].width;
+    const height = results[0].height;
+    const mostVisits = results[0].countOfMostVisits;
     const processedResults = []
-    processedResults.push()
-    const uint8Array = processCountsToColor(results[0].set, results[0].width, results[0].height, results[0].countOfMostVisits, config.colorFunction);
-    displayFrame({set: uint8Array, width: results[0].width, height: results[0].height});
+    for (let element of results)
+      processedResults.push(processCountsToColor(element.set, width, height, mostVisits, config.colorFunction));
+
     document.getElementById("DCPresults").textContent = '';
     document.getElementById("DCPstatus").textContent = '';
 
     // Display results as a gif
     const encoder = new GIFEncoder();
+    window.encoder = encoder; // expose the encoder so I can later download from it.
     encoder.setRepeat(0);
     encoder.setDelay(500);
+    encoder.setSize(width, height);
+    encoder.start()
+    for (let element of processedResults)
+      encoder.addFrame(element, true);
+    encoder.finish();
+
+    const binaryGif = encoder.stream().getData();
+    const dataURL = 'data:image/fig;base64,' + window.btoa(binaryGif);
+    const img = document.createElement("img");
+    img.id = "dcpGenImg"
+    img.src = dataURL;
+    document.getElementById('imageDiv').appendChild(img);
+
+    dcpGenerated = true;
+  
   }
   else 
   {
@@ -159,6 +212,7 @@ async function generateImage(ev) {
     
   }
   generated = true;
+  generating = false;
 }
 function main() {
   const wallet = dcp.wallet; // DCP specific class - wallets

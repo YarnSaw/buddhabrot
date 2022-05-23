@@ -118,7 +118,8 @@ exports.saveFrame = function saveFrame(frameData, imagePath, encoder, settings) 
 exports.displayFrame = function displayFrame(frameData) {
   const { width, height, set, } = frameData;
   // use npm canvas to create a display for the results
-  const canvas = document.getElementById('canvas');
+  const canvas = document.createElement('canvas');
+  canvas.id = "canvasImg";
   // @ts-ignore
   canvas.width = width;
   // @ts-ignore
@@ -131,6 +132,8 @@ exports.displayFrame = function displayFrame(frameData) {
     imgData.data[i] = set[i];
   }
   context.putImageData(imgData, 0, 0);
+
+  document.getElementById('canvasDiv').appendChild(canvas);
 };
 
 exports.createAndSaveFrame = function createAndSaveFrame(config, imagePath) {
