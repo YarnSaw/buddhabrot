@@ -19,6 +19,7 @@ function downloadBrot(ev) {
   if (dcpGenerated)
   {
     ev.preventDefault();
+    // TODO: fix downloading the video
     window.encoder.download('download.gif');
   }
   else
@@ -39,7 +40,7 @@ async function generateImage(ev) {
   // Remove previously generated image
   if (dcpGenerated)
   {
-    const img = document.getElementById('dcpGenImg');
+    const img = document.getElementById('dcpGenVid');
     if (img && img.parentNode)
       img.parentNode.removeChild(img);
   }
@@ -120,10 +121,12 @@ async function generateImage(ev) {
       return createFrame(config);
     };
 
+    // let inputSet = [51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100]
+    let inputSet = [100]
     config.asyncGen = false;
     config.colorImage = false;
     const job = compute.for(
-      [100], workFunction, [config]
+      inputSet, workFunction, [config]
     );
 
     job.on('accepted', () => {
@@ -177,23 +180,73 @@ async function generateImage(ev) {
     document.getElementById("DCPresults").textContent = '';
     document.getElementById("DCPstatus").textContent = '';
 
-    // Display results as a gif
-    const encoder = new GIFEncoder();
-    window.encoder = encoder; // expose the encoder so I can later download from it.
-    encoder.setRepeat(0);
-    encoder.setDelay(500);
-    encoder.setSize(width, height);
-    encoder.start()
-    for (let element of processedResults)
-      encoder.addFrame(element, true);
-    encoder.finish();
+    var ele = document.createElement('a');
+    // ele.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(processedResults[processedResults.length - 1]));
+    ele.setAttribute('href', 'data:text/plain;charset=utf-8,' + new TextDecoder().decode(processedResults[processedResults.length - 1]));
+    ele.setAttribute('download', "out.txt");
+  
+    ele.style.display = 'none';
+    document.body.appendChild(ele);
+  
+    ele.click();
+    console.log("clicked")
+    // document.body.removeChild(ele);
 
-    const binaryGif = encoder.stream().getData();
-    const dataURL = 'data:image/fig;base64,' + window.btoa(binaryGif);
-    const img = document.createElement("img");
-    img.id = "dcpGenImg"
-    img.src = dataURL;
-    document.getElementById('imageDiv').appendChild(img);
+    const set = processedResults[processedResults.length - 1]
+
+    const canvas = document.createElement('canvas');
+    canvas.id = "canvasImg";
+    // @ts-ignore
+    canvas.width = width;
+    // @ts-ignore
+    canvas.height = height;
+    // @ts-ignore
+    const context = canvas.getContext('2d');
+    const imgData = context.createImageData(width, height);
+
+    for (let i = 0; i < set.length; i++) {
+      imgData.data[i] = set[i];
+    }
+    context.putImageData(imgData, 0, 0);
+
+    document.getElementById('canvasDiv').appendChild(canvas);
+
+
+    // Display results as a gif
+    const writer = new WebMWriter({
+      quality: 1,
+      frameDuration: 50
+    });
+    window.writer = writer; // expose the encoder so I can later download from it.
+    // encoder.setRepeat(0);
+    // encoder.setDelay(500);
+    // encoder.setSize(width, height);
+    // encoder.start()
+    // for (let element of processedResults)
+    //   encoder.addFrame(element, true);
+    // encoder.finish();
+
+    let element;
+    while (element = processedResults.shift())
+    {
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const context = canvas.getContext('2d');
+      const imgData = context.createImageData(width, height);
+      for (let i = 0; i < element.length; i++) {
+        imgData.data[i] = element[i];
+      }
+      context.putImageData(imgData, 0, 0);
+      writer.addFrame(canvas);      
+    }
+    const completeBlob = await writer.complete();
+    
+
+    const video = document.createElement("video");
+    video.id = "dcpGenVid"
+    video.src = URL.createObjectURL(completeBlob);
+    document.getElementById('videoDiv').appendChild(video);
 
     dcpGenerated = true;
   
