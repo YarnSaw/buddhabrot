@@ -169,10 +169,9 @@ async function generateImage(ev) {
     results = Array.from(results);
     const width = results[0].width;
     const height = results[0].height;
-    const mostVisits = results[0].countOfMostVisits;
     const processedResults = []
     for (let element of results)
-      processedResults.push(processCountsToColor(element.set, width, height, mostVisits, config.colorFunction));
+      processedResults.push(processCountsToColor(element.set, width, height, element.countOfMostVisits, config.colorFunction));
 
     document.getElementById("DCPresults").textContent = '';
     document.getElementById("DCPstatus").textContent = '';
