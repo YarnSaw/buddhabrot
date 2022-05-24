@@ -180,7 +180,7 @@ async function generateImage(ev) {
     const encoder = new GIFEncoder();
     window.encoder = encoder; // expose the encoder so I can later download from it.
     encoder.setRepeat(0);
-    encoder.setDelay(500);
+    encoder.setDelay(50);
     encoder.setSize(width, height);
     encoder.start()
     for (let element of processedResults)
