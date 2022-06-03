@@ -28,14 +28,8 @@ function downloadBrot(ev) {
   }
 }
 
-async function generateImage(ev) {
-  ev.preventDefault();
-  if (generating)
-  {
-    alert("Cannot generate image when one is already being generated");
-    return;
-  }
-  
+async function cleanupPreviousImage()
+{
   // Remove previously generated image
   if (dcpGenerated)
   {
@@ -49,15 +43,16 @@ async function generateImage(ev) {
     if (img && img.parentNode)
       img.parentNode.removeChild(img);
   }
-
-  // Let browser remove previous image
-  await new Promise((resolve, reject) =>  setTimeout(() => resolve(), 10));
-
   generating = true;
   generated = false;
   dcpGenerated = false;
 
-  const { createFrame, displayFrame, } = require('./src/single-frame');
+  // Let browser remove previous image
+  await new Promise((resolve, reject) =>  setTimeout(() => resolve(), 10));
+}
+
+function getConfig(ev)
+{
   const defaultConfig = require('./src/config').init()
 
   const elements = ev.target.elements;
@@ -75,7 +70,7 @@ async function generateImage(ev) {
       elements.colorFunction.disabled = true;
       elements.customColorFunc.checked
       elements.colorFunction.value = elements.colorFunction.textContent;
-      return;
+      return false;
     }
   }
 
@@ -98,83 +93,106 @@ async function generateImage(ev) {
 
   if (!elements.useSmoothing.checked)
     delete config.smoothingKernel;
+  
+  return config;
+}
 
+async function deployDCPJob(config, elements)
+{
+  // Ensure keystore is loaded
+  if (!keystore)
+  {
+    keystore = await dcp.wallet.get();
+    document.getElementById("keystoreLabel").style.display = 'none';
+    document.getElementById("keystoreFile").style.display = 'none';
+  }
+
+  // Can't pass functions over dcp, so need to stringify colorFunction
+  // config.colorFunction = config.colorFunction.toString();
+
+  const compute = dcp.compute;
+  const workFunction = function work(iter, config) {
+    config.iterations = iter;
+    config.dcp = true;
+    const { createFrame, } = require('single-frame.js');
+    return createFrame(config);
+  };
+
+  config.asyncGen = false;
+  config.colorImage = false;
+  const job = compute.for(
+    [100], workFunction, [config]
+  );
+
+  job.on('accepted', () => {
+    console.log(` - Job accepted by scheduler, waiting for results`);
+    console.log(` - Job has id ${job.id}`);
+  });
+
+  job.on('readystatechange', (arg) => {
+    document.getElementById("DCPstatus").textContent = "Ready state of job: " + arg;
+    console.log(`new ready state: ${arg}`);
+  });
+
+  var resultsReceived = 0
+  document.getElementById("DCPresults").textContent = `Received ${resultsReceived} slices.`
+  job.on('result', (ev) => {
+    resultsReceived++;
+    document.getElementById("DCPresults").textContent = `Received ${resultsReceived} slice(s).`
+    console.log("Got a result", ev.sliceNumber);
+  });
+
+  job.on(('error'), (ev) => {
+    console.log(ev);
+  });
+
+  job.requires(['buddhabrot_yarn/single-frame.js']);
+  job.public.name = "buddhabrot generation";
+  job.setPaymentAccountKeystore(keystore);
+
+  if (elements.joinKey.value && elements.joinSecret.value)
+  {
+    job.computeGroups = [{ joinKey: elements.joinKey.value, joinSecret: elements.joinSecret.value }]
+  }
+
+  let results;
+  if (document.getElementById("localExec").checked)
+    results = await job.localExec();
+  else
+    results = await job.exec(compute.marketValue);
+
+  const { processCountsToColor } = require('./src/set-generation');
+
+  results = Array.from(results);
+  const width = results[0].width;
+  const height = results[0].height;
+  const processedResults = []
+  for (let element of results)
+    processedResults.push(processCountsToColor(element.set, width, height, element.countOfMostVisits, config.colorFunction));
+
+  document.getElementById("DCPresults").textContent = '';
+  document.getElementById("DCPstatus").textContent = '';
+
+  return { processedResults, width, height };
+}
+
+async function generateImage(ev) {
+  ev.preventDefault();
+  if (generating)
+  {
+    alert("Cannot generate image when one is already being generated");
+    return;
+  }
+
+  await cleanupPreviousImage();
+
+  const config = getConfig(ev);
+  if (!config)
+    return;
+  
   if (document.getElementById("useDCP").checked)
   {
-    // Ensure keystore is loaded
-    if (!keystore)
-    {
-      keystore = await dcp.wallet.get();
-      document.getElementById("keystoreLabel").style.display = 'none';
-      document.getElementById("keystoreFile").style.display = 'none';
-    }
-
-    // Can't pass functions over dcp, so need to stringify colorFunction
-    // config.colorFunction = config.colorFunction.toString();
-
-    const compute = dcp.compute;
-    const workFunction = function work(iter, config) {
-      config.iterations = iter;
-      config.dcp = true;
-      const { createFrame, } = require('single-frame.js');
-      return createFrame(config);
-    };
-
-    config.asyncGen = false;
-    config.colorImage = false;
-    const job = compute.for(
-      [100], workFunction, [config]
-    );
-
-    job.on('accepted', () => {
-      console.log(` - Job accepted by scheduler, waiting for results`);
-      console.log(` - Job has id ${job.id}`);
-    });
-
-    job.on('readystatechange', (arg) => {
-      document.getElementById("DCPstatus").textContent = "Ready state of job: " + arg;
-      console.log(`new ready state: ${arg}`);
-    });
-
-    var resultsReceived = 0
-    document.getElementById("DCPresults").textContent = `Received ${resultsReceived} slices.`
-    job.on('result', (ev) => {
-      resultsReceived++;
-      document.getElementById("DCPresults").textContent = `Received ${resultsReceived} slice(s).`
-      console.log("Got a result", ev.sliceNumber);
-    });
-
-    job.on(('error'), (ev) => {
-      console.log(ev);
-    });
-
-    job.requires(['buddhabrot_yarn/single-frame.js']);
-    job.public.name = "buddhabrot generation";
-    job.setPaymentAccountKeystore(keystore);
-
-    if (elements.joinKey.value && elements.joinSecret.value)
-    {
-      job.computeGroups = [{ joinKey: elements.joinKey.value, joinSecret: elements.joinSecret.value }]
-    }
-
-    let results;
-    if (document.getElementById("localExec").checked) {
-      results = await job.localExec();
-    } else {
-      results = await job.exec(compute.marketValue);
-    }
-
-    const { processCountsToColor } = require('./src/set-generation');
-
-    results = Array.from(results);
-    const width = results[0].width;
-    const height = results[0].height;
-    const processedResults = []
-    for (let element of results)
-      processedResults.push(processCountsToColor(element.set, width, height, element.countOfMostVisits, config.colorFunction));
-
-    document.getElementById("DCPresults").textContent = '';
-    document.getElementById("DCPstatus").textContent = '';
+    const { processedResults, width, height } = await deployDCPJob(config, ev.target.elements);
 
     // Display results as a gif
     const encoder = new GIFEncoder();
@@ -195,7 +213,6 @@ async function generateImage(ev) {
     document.getElementById('imageDiv').appendChild(img);
 
     dcpGenerated = true;
-  
   }
   else 
   {
@@ -203,6 +220,7 @@ async function generateImage(ev) {
     
     // Alow browser to update text before fully sync operation. In the future should probably use a web worker for this.
     setTimeout(async () => {
+      const { createFrame, displayFrame, } = require('./src/single-frame');
       const frame = await createFrame(config);
       displayFrame(frame);
       document.getElementById("generatingIndicator").textContent = "";
@@ -213,7 +231,8 @@ async function generateImage(ev) {
   generated = true;
   generating = false;
 }
-function main() {
+
+function setupListeners() {
   const wallet = dcp.wallet; // DCP specific class - wallets
 
   // Set keystore when selected and remove the upload button
@@ -252,10 +271,10 @@ function main() {
 }
 
 if (['interactive', 'complete'].includes(document.readyState))
-  main();
+  setupListeners();
 else
   window.addEventListener('DOMContentLoaded', (ev) => {
-    main();
+    setupListeners();
   });
 
 });
