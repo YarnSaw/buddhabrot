@@ -83,38 +83,6 @@ exports.createFrame = async function createFrame(config) {
   }
 };
 
-/**
- * Save the generated image
- * @param {object} frameData - width, height, and color values for the image
- * @param {string} imagePath - path to save the image
- * @param {*} [encoder] - encoder for gif
- * @param {object} [settings] - environment settings
- */
-exports.saveFrame = function saveFrame(frameData, imagePath, encoder, settings) {
-  const { width, height, set, } = frameData;
-  const { createCanvas, } = require('canvas');
-
-  // use npm canvas to create a display for the results
-  const canvas = createCanvas(width, height);
-  const context = canvas.getContext('2d');
-  const imgData = context.createImageData(width, height);
-
-  // pass the image data from the work function into the imgData for the canvas
-  for (let i = 0; i < set.length; i++) {
-    imgData.data[i] = set[i];
-  }
-  // save the image to a file and add it to the gif (if applicable)
-  context.putImageData(imgData, 0, 0);
-  if (encoder) {
-    encoder.addFrame(context);
-  }
-  if (settings && settings.SAVE_IMAGES) {
-    const buffer = canvas.toBuffer('image/png');
-    const fs = require('fs');
-    fs.writeFileSync(imagePath, buffer);
-  }
-};
-
 exports.displayFrame = function displayFrame(frameData) {
   const { width, height, set, } = frameData;
   // use npm canvas to create a display for the results
@@ -134,12 +102,6 @@ exports.displayFrame = function displayFrame(frameData) {
   context.putImageData(imgData, 0, 0);
 
   document.getElementById('canvasDiv').appendChild(canvas);
-};
-
-exports.createAndSaveFrame = function createAndSaveFrame(config, imagePath) {
-  const frameData = exports.createFrame(config);
-
-  exports.saveFrame(frameData, imagePath);
 };
 
 });
