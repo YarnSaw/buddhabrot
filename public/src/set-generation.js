@@ -71,34 +71,10 @@ exports.generateAllPoints = async function findAllPaths(config) {
       // @ts-ignore
       progress(); // eslint-disable-line no-undef
     }
-    if (config.asyncGen)
-    {
-      document.getElementById('progress').textContent = `Progress: ${(iter/numHeightIter*100).toFixed(2)}%`;
-      // If allow for each point to be calculated on new passes of the event loop. Stops the browser
-      // from freezing when generating the points (since there's no web worker being used for this).
-      await new Promise((resolve, reject) =>
-      {
-        setTimeout(async () =>
-        {
-          for (let width = setDimensions.left; width < setDimensions.right; width = width + accuracy)
-          {          
-            const path = calculatePath([width, height], config);
-            if (path)
-            {
-              escapePaths.push(path);
-            }
-          }
-          resolve();
-        })
-      })
-    }
-    else
-    {
-      for (let width = setDimensions.left; width < setDimensions.right; width = width + accuracy) {
-        const path = calculatePath([width, height], config);
-        if (path) {
-          escapePaths.push(path);
-        }
+    for (let width = setDimensions.left; width < setDimensions.right; width = width + accuracy) {
+      const path = calculatePath([width, height], config);
+      if (path) {
+        escapePaths.push(path);
       }
     }
   }
