@@ -22,11 +22,7 @@
     "@babel/core": "^7.17.10",
     "@babel/preset-env": "^7.17.10",
     "@babel/register": "^7.17.7",
-    "babel": "^6.23.0",
-    "canvas": "^2.9.1",
-    "dcp-client": "^4.2.3",
     "dcp-util": "^2.2.3",
-    "dcp-worker": "^3.2.3",
     "gifencoder": "^2.0.1"
   },
   "devDependencies": {
