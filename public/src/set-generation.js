@@ -19,11 +19,11 @@ module.declare([], function(require, exports, modules) {
  * Calculates if a given point is in the mandelbrot, and if it isn't
  * will return the escape path.
  * @param {Array} startPoint
- * @param {config} config
+ * @param {number} iterations - number of iterations to calculate over
+ * @param {number} escapeDistance - distance for a point to be considered 'escaped'
  * @returns {Array.<number[]>} path points take to escape the set.
  */
-function calculatePath(startPoint, config) {
-  const { iterations, escapeDistance, } = config;
+function calculatePath(startPoint, iterations, escapeDistance) {
   let realValueNew;
   let realValue = startPoint[0];
   let complexValue = startPoint[1];
@@ -56,29 +56,35 @@ function calculatePath(startPoint, config) {
 
 /**
  * Calculates the escape paths of all points as defined in the buddhabrot config.
- * @param {config} config
- * @returns {Promise<Array.<number[]>>} - list of all escape paths of all points calculated.
+ * @param {object} calcDimensions - dimensions to calculate for in this iteration
+ * @param {number} calculationAccuracy - accuracy to calculate within the dimensions for (separate each 1x1 block into calculationAccuracy x calculationAccuracy area to compute)
+ * @param {number} iterations - number of iterations to calculate over
+ * @param {number} escapeDistance - distance for a point to be considered 'escaped'
  */
-exports.generateAllPoints = async function findAllPaths(config) {
-  const { setDimensions, calculationAccuracy, } = config;
+exports.generateAllPoints = async function findAllPaths(calcDimensions, calculationAccuracy, iterations, escapeDistance, partialImage, config) {
   const accuracy = 1 / calculationAccuracy;
-  const escapePaths = [];
-  const numHeightIter = (setDimensions.up - setDimensions.down)/accuracy;
-  let iter = -1;
-  for (let height = setDimensions.up; height > setDimensions.down; height = height - accuracy) {
-    iter++;
-    if (config.dcp) {
-      // @ts-ignore
-      progress(); // eslint-disable-line no-undef
-    }
-    for (let width = setDimensions.left; width < setDimensions.right; width = width + accuracy) {
-      const path = calculatePath([width, height], config);
+  const imgSize = partialImage.length * partialImage[0].length
+  let escapePaths = [];
+  let pathSize = 0;
+  for (let height = calcDimensions.up; height > calcDimensions.down; height = height - accuracy) {
+    for (let width = calcDimensions.left; width < calcDimensions.right; width = width + accuracy) {
+      if (config.dcp) {
+        // @ts-ignore
+        progress(); // eslint-disable-line no-undef
+      }
+      const path = calculatePath([width, height], iterations, escapeDistance);
       if (path) {
-        escapePaths.push(path);
+        escapePaths.push(...path);
+        pathSize++;
+        if (pathSize*iterations > imgSize * 3)
+        {
+          exports.cleanupSet(escapePaths, partialImage, config);
+          pathSize = 0;
+          escapePaths = [];
+        }
       }
     }
   }
-  return escapePaths.flat();
 };
 
 /**
@@ -88,11 +94,8 @@ exports.generateAllPoints = async function findAllPaths(config) {
  * @param {config} config - buddhabrot config
  * @returns {Array.<number[]>} imagePointOccurances - frequency each pixel in the image is hit
  */
-exports.cleanupSet = function cleanPoints(allPoints, config) {
+exports.cleanupSet = function cleanPoints(allPoints, imagePointOccurances, config) {
   const { imageScaleup, setDimensions, } = config;
-  const width = Math.floor(imageScaleup * (setDimensions.right - setDimensions.left) + 1);
-  const height = Math.floor(imageScaleup * (setDimensions.up - setDimensions.down) + 1);
-  const imagePointOccurances = new Array(height).fill().map(() => Array(width).fill(0));
 
   for (const point of allPoints) {
     // It's possible for a point to fall in the range between the screens view and the escape

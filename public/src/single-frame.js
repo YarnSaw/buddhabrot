@@ -25,16 +25,19 @@ const { generateAllPoints, processCountsToColor, cleanupSet, } = require('./set-
  */
 exports.createFrame = async function createFrame(config) {
   // Find all the points for the set.
-  const setPoints = await generateAllPoints(config);
+  const { imageScaleup, setDimensions, } = config;
+  const width = Math.floor(imageScaleup * (setDimensions.right - setDimensions.left) + 1);
+  const height = Math.floor(imageScaleup * (setDimensions.up - setDimensions.down) + 1);
+  const pointsInImage = new Array(height).fill().map(() => Array(width).fill(0));
+
+  await generateAllPoints(config.setDimensions, config.calculationAccuracy, config.iterations, config.escapeDistance, pointsInImage, config);
   if (config.dcp) {
     // @ts-ignore
     progress(); // eslint-disable-line no-undef
   }
   // Process the points / prepare them for the image
-  const cleanedSet = cleanupSet(setPoints, config);
-  const width = cleanedSet[0].length;
-  const height = cleanedSet.length;
-  let flatCleanedSet = cleanedSet.flat();
+  // const cleanedSet = cleanupSet(setPoints, config);
+  let flatCleanedSet = pointsInImage.flat();
 
   if (config.smoothingKernel)
   {

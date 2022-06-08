@@ -17,7 +17,8 @@ module.declare([], function(require, exports, modules) {
  * @property {number} escapeDistance - distance for a point to be considered to have escaped
  * @property {number} iterations - iterations to be computed
  * @property {number} calculationAccuracy - accuracy to calculate the image at - how many segments to cut an integer value into to compute
- * @property {object} setDimensions - how far in each direction to compute in real and complex axes.
+ * @property {object} setDimensions - dimensions for the full set to be computed.
+ * @property {object} [calcDimensions] - dimensions to calculate for one specific slice/segment of the image
  * @property {Boolean} colorImage -  if true, color the image while creating it, else return raw point values for pixels in the image 
  * @property {Boolean} [dcp] - if the generation is done using DCP
  * @property {number[][]} [smoothingKernel] - 3x3 matrix that may be supplied to smooth the image after generation (recommended is all values being 1/9)
