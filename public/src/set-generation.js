@@ -118,7 +118,7 @@ exports.joinPointsToSet = function cleanPoints(allPoints, currentSet, config) {
  * @param {Array.<Array.<number[]>>} arrays - list of arrays to concat
  * @returns {Array.<number[]>} result of the concatenations 
 */
-exports.joinPointsToSet = function cleanPoints(...arrays)
+exports.concatenateSets = function cleanPoints(...arrays)
 {
   const width = arrays[0].length;
   const height = arrays[0][0].length;

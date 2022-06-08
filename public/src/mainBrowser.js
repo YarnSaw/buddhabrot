@@ -90,6 +90,7 @@ function getConfig(ev)
     colorFunction: eval(elements.colorFunction.value),
     asyncGen: elements.asyncGen.checked,
   };
+  config.calcDimensions = config.setDimensions;
 
   if (!elements.useSmoothing.checked)
     delete config.smoothingKernel;
