@@ -78,7 +78,7 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
         pathSize++;
         if (pathSize*iterations > imgSize * 3)
         {
-          exports.cleanupSet(escapePaths, partialImage, config);
+          exports.joinPointsToSet(escapePaths, partialImage, config);
           pathSize = 0;
           escapePaths = [];
         }
@@ -88,13 +88,13 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
 };
 
 /**
- * Take a set of points pairs + a config, and will map those points to a new array
- * that counts how often each pixel in the image has been hit
+ * Takes in a set of points, as well as a 2d array and maps the new points into their appropriate
+ * location within the grid.
  * @param {Array.<number[]>} allPoints - pairs of points
+ * @param {Array.<number[]>} currentSet - set to be built upon
  * @param {config} config - buddhabrot config
- * @returns {Array.<number[]>} imagePointOccurances - frequency each pixel in the image is hit
  */
-exports.cleanupSet = function cleanPoints(allPoints, imagePointOccurances, config) {
+exports.joinPointsToSet = function cleanPoints(allPoints, currentSet, config) {
   const { imageScaleup, setDimensions, } = config;
 
   for (const point of allPoints) {
@@ -107,10 +107,29 @@ exports.cleanupSet = function cleanPoints(allPoints, imagePointOccurances, confi
       && point[1] < setDimensions.up) {
       const realScaledValue = Math.round(point[0] * imageScaleup + -setDimensions.left * imageScaleup);
       const complexScaledValue = Math.round(point[1] * imageScaleup + -setDimensions.down * imageScaleup);
-      imagePointOccurances[complexScaledValue][realScaledValue]++;
+      currentSet[complexScaledValue][realScaledValue]++;
     }
   }
-  return imagePointOccurances;
+};
+
+/**
+ * Takes in multiple 2d arrays that are all expected to be the same width/height and
+ * returns a new array with all the values in each cell together
+ * @param {Array.<Array.<number[]>>} arrays - list of arrays to concat
+ * @returns {Array.<number[]>} result of the concatenations 
+*/
+exports.joinPointsToSet = function cleanPoints(...arrays)
+{
+  const width = arrays[0].length;
+  const height = arrays[0][0].length;
+  const concatenatedArray = new Array(height).fill().map(() => Array(width).fill(0));
+
+  for (let array of arrays)
+    for (let row = 0; row < width; row++)
+      for (let col = 0; col < width; col++)
+        concatenatedArray[row][col] += array[row][col];
+  
+  return concatenatedArray;
 };
 
 /**
@@ -120,7 +139,7 @@ exports.cleanupSet = function cleanPoints(allPoints, imagePointOccurances, confi
  * @param {number} height - height of the image
  * @param {number} mostVisits - value at most visited pixel
  * @param {function(number, number):number[]} colorFunc - function to color each pixel based off visits to it.
- * @returns Uint8ClampedArray that is the full image
+ * @returns {Uint8ClampedArray} - the full image
  */
 exports.processCountsToColor = function processCountsToColor(cleanedSet, width, height, mostVisits, colorFunc) {
   const uint8Array = new Uint8ClampedArray(width * height * 4);

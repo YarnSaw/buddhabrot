@@ -16,7 +16,7 @@
 module.declare(['./set-generation'], function(require, exports, modules) {
 
 
-const { generateAllPoints, processCountsToColor, cleanupSet, } = require('./set-generation');
+const { generateAllPoints, processCountsToColor, } = require('./set-generation');
 
 /**
  * Creates all the necessary data for a single frame of the buddhabrot
@@ -30,13 +30,12 @@ exports.createFrame = async function createFrame(config) {
   const height = Math.floor(imageScaleup * (setDimensions.up - setDimensions.down) + 1);
   const pointsInImage = new Array(height).fill().map(() => Array(width).fill(0));
 
-  await generateAllPoints(config.setDimensions, config.calculationAccuracy, config.iterations, config.escapeDistance, pointsInImage, config);
+  await generateAllPoints(config.calcDimensions, config.calculationAccuracy, config.iterations, config.escapeDistance, pointsInImage, config);
   if (config.dcp) {
     // @ts-ignore
     progress(); // eslint-disable-line no-undef
   }
-  // Process the points / prepare them for the image
-  // const cleanedSet = cleanupSet(setPoints, config);
+
   let flatCleanedSet = pointsInImage.flat();
 
   if (config.smoothingKernel)
