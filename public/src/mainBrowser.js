@@ -112,17 +112,27 @@ async function deployDCPJob(config, elements)
   // config.colorFunction = config.colorFunction.toString();
 
   const compute = dcp.compute;
-  const workFunction = function work(iter, config) {
-    config.iterations = iter;
+  const workFunction = function work(setGenParams, config) {
+    config.iterations = setGenParams.iterations;
+    config.segmentNumber = setGenParams.segmentNumber;
+    config.totalSegments = setGenParams.totalSegments;
     config.dcp = true;
     const { createFrame, } = require('single-frame.js');
     return createFrame(config);
   };
 
+  const inputSet = function* generator()
+  {
+    yield { iterations: 500, segmentNumber: 0, totalSegments: 4 };
+    yield { iterations: 500, segmentNumber: 1, totalSegments: 4 };
+    yield { iterations: 500, segmentNumber: 2, totalSegments: 4 };
+    yield { iterations: 500, segmentNumber: 3, totalSegments: 4 };
+  }
+
   config.asyncGen = false;
   config.colorImage = false;
   const job = compute.for(
-    [100], workFunction, [config]
+    inputSet(), workFunction, [config]
   );
 
   job.on('accepted', () => {
@@ -162,19 +172,34 @@ async function deployDCPJob(config, elements)
   else
     results = await job.exec(compute.marketValue);
 
-  const { processCountsToColor } = require('./src/set-generation');
+  return Array.from(results);
+}
 
-  results = Array.from(results);
+function processDCPResults(results, colorFunction)
+{
+  const { processCountsToColor, concatenateSets } = require('./src/set-generation');
   const width = results[0].width;
   const height = results[0].height;
+
   const processedResults = []
-  for (let element of results)
-    processedResults.push(processCountsToColor(element.set, width, height, element.countOfMostVisits, config.colorFunction));
+  while (results.length)
+  {
+    const currentIter = results[0].iterations;
+    const segmentsOfImage = results.filter(res => res.iterations === currentIter);
+    results.slice(0, segmentsOfImage.length);
+    const fullSet = concatenateSets(...(segmentsOfImage.map(seg => seg.set)));
+    const countOfMostVisits = fullSet.reduce(function(a, b) {
+      return Math.max(a, b);
+    }); 
+
+    processedResults.push(processCountsToColor(fullSet, width, height, countOfMostVisits, colorFunction));
+
+  }
 
   document.getElementById("DCPresults").textContent = '';
   document.getElementById("DCPstatus").textContent = '';
 
-  return { processedResults, width, height };
+  return processedResults;
 }
 
 async function generateImage(ev) {
@@ -193,8 +218,12 @@ async function generateImage(ev) {
   
   if (document.getElementById("useDCP").checked)
   {
-    const { processedResults, width, height } = await deployDCPJob(config, ev.target.elements);
+    const results = await deployDCPJob(config, ev.target.elements);
 
+    const processedResults = processDCPResults(results, config.colorFunction);
+    const width = results[0].width;
+    const height = results[0].height;
+    
     // Display results as a gif
     const encoder = new GIFEncoder();
     window.encoder = encoder; // expose the encoder so I can later download from it.
@@ -223,6 +252,12 @@ async function generateImage(ev) {
     setTimeout(async () => {
       const { createFrame, displayFrame, } = require('./src/single-frame');
       const frame = await createFrame(config);
+
+      const { processCountsToColor } = require('./src/set-generation');
+      if (typeof config.colorFunction === 'string')
+        config.colorFunction = eval(config.colorFunction);
+      frame.set = processCountsToColor(frame.set, frame.width, frame.height, frame.countOfMostVisits, config.colorFunction);
+
       displayFrame(frame);
       document.getElementById("generatingIndicator").textContent = "";
       document.getElementById('progress').textContent = "";

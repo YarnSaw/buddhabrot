@@ -30,6 +30,24 @@ exports.createFrame = async function createFrame(config) {
   const height = Math.floor(imageScaleup * (setDimensions.up - setDimensions.down) + 1);
   const pointsInImage = new Array(height).fill().map(() => Array(width).fill(0));
 
+  if (config.totalSegments === 1)
+    config.calcDimensions = config.setDimensions;
+  else
+  {
+    const sizeOfImage = Math.sqrt(config.totalSegments);
+    const offsetW = config.segmentNumber % sizeOfImage;
+    const offsetH = Math.floor(config.segmentNumber / sizeOfImage);
+    const totalHeight = config.setDimensions.up - config.setDimensions.down;
+    const totalWidth = config.setDimensions.right - config.setDimensions.left;
+
+    config.calcDimensions = {
+      up: config.setDimensions.up - (totalHeight * offsetH / sizeOfImage),
+      down: config.setDimensions.up - (totalHeight * (offsetH + 1) / sizeOfImage),
+      right: config.setDimensions.right - (totalWidth * offsetW / sizeOfImage),
+      left: config.setDimensions.right - (totalWidth * (offsetW + 1) / sizeOfImage),
+    };
+  }
+
   await generateAllPoints(config.calcDimensions, config.calculationAccuracy, config.iterations, config.escapeDistance, pointsInImage, config);
   if (config.dcp) {
     // @ts-ignore
@@ -63,25 +81,12 @@ exports.createFrame = async function createFrame(config) {
     return Math.max(a, b);
   });
 
-  if (config.colorImage)
-  {
-    // Ensure the color func is a function. May need to be a string to get past serialization in a worker.
-    if (typeof config.colorFunction === 'string')
-      config.colorFunction = eval(config.colorFunction)
-    // @ts-ignore
-    const uint8Array = processCountsToColor(flatCleanedSet, width, height, countOfMostVisits, config.colorFunction);
-
-    return {
-      set: uint8Array,
-      width,
-      height,
-    };
-  }
   return {
     set: flatCleanedSet,
     width,
     height,
     countOfMostVisits,
+    iterations: config.iterations,
   }
 };
 

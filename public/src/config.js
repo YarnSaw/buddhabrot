@@ -18,8 +18,10 @@ module.declare([], function(require, exports, modules) {
  * @property {number} iterations - iterations to be computed
  * @property {number} calculationAccuracy - accuracy to calculate the image at - how many segments to cut an integer value into to compute
  * @property {object} setDimensions - dimensions for the full set to be computed.
- * @property {object} calcDimensions - dimensions to calculate for one specific slice/segment of the image. Make equal to setDimensions to generate full image, or part of it for good slicing.
  * @property {Boolean} colorImage -  if true, color the image while creating it, else return raw point values for pixels in the image 
+ * @property {number} segmentNumber - segment of partial set to generate
+ * @property {number} totalSegments - total segments the set will be using. Must be a square number to break the segment into a grid.
+ * @property {object} [calcDimensions] - dimensions to calculate for one specific slice/segment of the image. Make equal to setDimensions to generate full image, or part of it for good slicing.
  * @property {Boolean} [dcp] - if the generation is done using DCP
  * @property {number[][]} [smoothingKernel] - 3x3 matrix that may be supplied to smooth the image after generation (recommended is all values being 1/9)
  * @property {Boolean} [asyncGen] - have async operations within the buddhabrot generation, for local generation.
@@ -46,12 +48,8 @@ exports.init = function init() {
       right: 0.75,
       left: -1.5,
     },
-    calcDimensions: {
-      up: 1.1,
-      down: -1.1,
-      right: 0.75,
-      left: -1.5,
-    },
+    segmentNumber: 1,
+    totalSegments: 1,
     escapeDistance: 3,
     iterations: 100,
     // calculationAccuracy is how much the image is subdivided in calculations. Larger = more subdivisions
