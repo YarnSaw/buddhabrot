@@ -186,7 +186,7 @@ function processDCPResults(results, colorFunction)
   {
     const currentIter = results[0].iterations;
     const segmentsOfImage = results.filter(res => res.iterations === currentIter);
-    results.slice(0, segmentsOfImage.length);
+    results.splice(0, segmentsOfImage.length);
     const fullSet = concatenateSets(...(segmentsOfImage.map(seg => seg.set)));
     const countOfMostVisits = fullSet.reduce(function(a, b) {
       return Math.max(a, b);
@@ -219,10 +219,10 @@ async function generateImage(ev) {
   if (document.getElementById("useDCP").checked)
   {
     const results = await deployDCPJob(config, ev.target.elements);
-
-    const processedResults = processDCPResults(results, config.colorFunction);
     const width = results[0].width;
     const height = results[0].height;
+
+    const processedResults = processDCPResults(results, config.colorFunction);
     
     // Display results as a gif
     const encoder = new GIFEncoder();

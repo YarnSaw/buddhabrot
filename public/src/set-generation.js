@@ -113,21 +113,19 @@ exports.joinPointsToSet = function cleanPoints(allPoints, currentSet, config) {
 };
 
 /**
- * Takes in multiple 2d arrays that are all expected to be the same width/height and
- * returns a new array with all the values in each cell together
- * @param {Array.<Array.<number[]>>} arrays - list of arrays to concat
+ * Takes in multiple 1d arrays that are all expected be the same length
+ * returns a new array with all the values in each cell added together
+ * @param {Array<number[]>} arrays - list of arrays to concat
  * @returns {Array.<number[]>} result of the concatenations 
 */
 exports.concatenateSets = function cleanPoints(...arrays)
 {
-  const width = arrays[0].length;
-  const height = arrays[0][0].length;
-  const concatenatedArray = new Array(height).fill().map(() => Array(width).fill(0));
+  const len = arrays[0].length;
+  const concatenatedArray = new Array(len).fill(0);
 
   for (let array of arrays)
-    for (let row = 0; row < width; row++)
-      for (let col = 0; col < width; col++)
-        concatenatedArray[row][col] += array[row][col];
+    for (let i = 0; i < len; i++)
+        concatenatedArray[i] += array[i];
   
   return concatenatedArray;
 };
