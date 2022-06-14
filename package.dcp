@@ -1,6 +1,6 @@
 {
   "name": "buddhabrot_yarn",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "files": {
     "./public/src/single-frame.js": "single-frame.js",
     "./public/src/set-generation.js": "set-generation.js"
