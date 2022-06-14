@@ -67,7 +67,7 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
   let escapePaths = [];
   let pathSize = 0;
   let progressPercent = 0;
-  let progressMax = (calcDimensions.up - calcDimensions.down) / accuracy
+  let progressMax = ((calcDimensions.up - calcDimensions.down) / accuracy) + 10 // + 10 to make sure rounding errors don't cause problems
   for (let height = calcDimensions.up; height > calcDimensions.down; height = height - accuracy) {
     for (let width = calcDimensions.left; width < calcDimensions.right; width = width + accuracy) {
       if (config.dcp) {
