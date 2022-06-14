@@ -123,10 +123,8 @@ async function deployDCPJob(config, elements)
 
   const inputSet = function* generator()
   {
-    yield { iterations: 500, segmentNumber: 0, totalSegments: 4 };
-    yield { iterations: 500, segmentNumber: 1, totalSegments: 4 };
-    yield { iterations: 500, segmentNumber: 2, totalSegments: 4 };
-    yield { iterations: 500, segmentNumber: 3, totalSegments: 4 };
+    for (let i = 0; i < 25; i++)
+      yield { iterations: 5000, segmentNumber: i, totalSegments: 25 };
   }
 
   config.asyncGen = false;

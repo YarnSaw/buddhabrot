@@ -66,11 +66,13 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
   const imgSize = partialImage.length * partialImage[0].length
   let escapePaths = [];
   let pathSize = 0;
+  let progressPercent = 0;
+  let progressMax = (calcDimensions.up - calcDimensions.down) * accuracy
   for (let height = calcDimensions.up; height > calcDimensions.down; height = height - accuracy) {
     for (let width = calcDimensions.left; width < calcDimensions.right; width = width + accuracy) {
       if (config.dcp) {
         // @ts-ignore
-        progress(); // eslint-disable-line no-undef
+        progress(progressPercent/progressMax); // eslint-disable-line no-undef
       }
       const path = calculatePath([width, height], iterations, escapeDistance);
       if (path) {
@@ -84,6 +86,7 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
         }
       }
     }
+    progressPercent++;
   }
 };
 
