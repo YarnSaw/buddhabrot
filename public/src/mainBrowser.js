@@ -123,8 +123,8 @@ async function deployDCPJob(config, elements)
 
   const inputSet = function* generator()
   {
-    for (let i = 0; i < 81; i++)
-      yield { iterations: 1000, segmentNumber: i, totalSegments: 81 };
+    for (let i = 0; i < 400; i++)
+      yield { iterations: 10000, segmentNumber: i, totalSegments: 400 };
   }
 
   config.asyncGen = false;
@@ -164,7 +164,7 @@ async function deployDCPJob(config, elements)
 
   job.collateResults = false;
   job.requires(['buddhabrot_yarn/single-frame.js']);
-  job.public.name = "buddhabrot generation";
+  job.public.name = `buddhabrot generation @ ${Date.now()}`;
   job.setPaymentAccountKeystore(keystore);
 
   if (elements.joinKey.value && elements.joinSecret.value)
@@ -280,7 +280,9 @@ async function generateImage(ev) {
   if (document.getElementById("useDCP").checked)
   {
     const jobId = await deployDCPJob(config, ev.target.elements);
+    console.log("Job is complete, processing image now");
     const { processedResults, width, height } = await fetchResultsAndConstructImage(jobId, config.colorFunction);
+    console.log('Processing image to gif');
 
     document.getElementById("DCPresults").textContent = '';
     document.getElementById("DCPstatus").textContent = '';
