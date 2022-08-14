@@ -123,8 +123,8 @@ async function deployDCPJob(config, elements)
 
   const inputSet = function* generator()
   {
-    for (let i = 0; i < 25; i++)
-      yield { iterations: 5000, segmentNumber: i, totalSegments: 25 };
+    for (let i = 0; i < 81; i++)
+      yield { iterations: 1000, segmentNumber: i, totalSegments: 81 };
   }
 
   config.asyncGen = false;
@@ -143,18 +143,26 @@ async function deployDCPJob(config, elements)
     console.log(`new ready state: ${arg}`);
   });
 
-  var resultsReceived = 0
-  document.getElementById("DCPresults").textContent = `Received ${resultsReceived} slices.`
-  job.on('result', (ev) => {
-    resultsReceived++;
-    document.getElementById("DCPresults").textContent = `Received ${resultsReceived} slice(s).`
-    console.log("Got a result", ev.sliceNumber);
-  });
-
-  job.on(('error'), (ev) => {
+  job.on('error', (ev) => {
     console.log(ev);
   });
 
+  document.getElementById("DCPresults").textContent = `0  / ${job.jobInputData.length} slices computed.`
+  // var resultsReceived = 0
+  // job.on('result', (ev) => {
+  //   resultsReceived++;
+  //   document.getElementById("DCPresults").textContent = `Received ${resultsReceived} slice(s).`
+  //   console.log("Got a result", ev.sliceNumber);
+  // });
+
+  async function updateResultStats()
+  {
+    const info = await compute.getJobInfo(job.id);
+    document.getElementById("DCPresults").textContent = `${info.completedSlices} / ${job.jobInputData.length} slices computed.`;
+  }
+  const updateResInterval = setInterval(updateResultStats, 10 * 1000);
+
+  job.collateResults = false;
   job.requires(['buddhabrot_yarn/single-frame.js']);
   job.public.name = "buddhabrot generation";
   job.setPaymentAccountKeystore(keystore);
@@ -164,15 +172,19 @@ async function deployDCPJob(config, elements)
     job.computeGroups = [{ joinKey: elements.joinKey.value, joinSecret: elements.joinSecret.value }]
   }
 
-  let results;
   if (document.getElementById("localExec").checked)
-    results = await job.localExec();
+    await job.localExec();
   else
-    results = await job.exec(compute.marketValue);
+    await job.exec(compute.marketValue);
+  clearInterval(updateResInterval);
 
-  return Array.from(results);
+  return job.id;
 }
 
+/**
+ * Will be used in the future when generating actual gifs, multiple stages of images. Needs to be integrated
+ * into fetchResultsAndConstructImage to only load some of the images at a time.
+ */
 function processDCPResults(results, colorFunction)
 {
   const { processCountsToColor, concatenateSets } = require('./src/set-generation');
@@ -194,10 +206,61 @@ function processDCPResults(results, colorFunction)
 
   }
 
-  document.getElementById("DCPresults").textContent = '';
-  document.getElementById("DCPstatus").textContent = '';
-
   return processedResults;
+}
+
+async function fetchResultsAndConstructImage(jobId, colorFunction)
+{
+  const { processCountsToColor, concatenateSets } = require('./src/set-generation');
+
+
+  const info = await dcp.compute.getJobInfo(jobId);
+  const totalSlices = info.totalSlices;
+  const fetches = Math.floor(totalSlices/50);
+  let resultArrays = [];
+  let firstIter = true;
+
+  const ks = await dcp.wallet.get();
+  const conn = new dcp.protocol.Connection(dcpConfig.scheduler.services.resultSubmitter.location, ks);
+
+  for (let i = 0; i < fetches; i++)
+  {
+    const { success, payload } = await conn.send('fetchResult', {
+      job: jobId,
+      owner: (await dcp.wallet.get()).address,
+      range: new dcp['range-object'].RangeObject(i*50, (i+1)*50 - 1 /* values are inclusive */),
+    }, ks);
+    let results = [];
+
+    await Promise.all(payload.map(async r => {
+      results.push(await dcp.utils.fetchURI(decodeURIComponent(r.value), [dcpConfig.scheduler.location.origin]));
+    }));
+    
+    resultArrays.push(concatenateSets(...(results.map(res => res.set))));
+  }
+  // Get the remainder of slices
+  const { success, payload } = await conn.send('fetchResult', {
+    job: jobId,
+    owner: (await dcp.wallet.get()).address,
+    range: new dcp['range-object'].RangeObject(fetches * 50, totalSlices),
+  }, ks);
+
+  let results = [];
+  await Promise.all(payload.map(async r => {
+    results.push(await dcp.utils.fetchURI(decodeURIComponent(r.value), [dcpConfig.scheduler.location.origin]));
+  }));
+
+  resultArrays.push(concatenateSets(...(results.map(res => res.set))));
+
+  const overalResult = concatenateSets(...resultArrays);
+  const countOfMostVisits = overalResult.reduce(function(a, b) {
+    return Math.max(a, b);
+  }); 
+
+  const width = results[0].width;
+  const height = results[0].height;
+
+  return {width, height, processedResults: [processCountsToColor(overalResult, width, height, countOfMostVisits, colorFunction)]};
 }
 
 async function generateImage(ev) {
@@ -216,12 +279,12 @@ async function generateImage(ev) {
   
   if (document.getElementById("useDCP").checked)
   {
-    const results = await deployDCPJob(config, ev.target.elements);
-    const width = results[0].width;
-    const height = results[0].height;
+    const jobId = await deployDCPJob(config, ev.target.elements);
+    const { processedResults, width, height } = await fetchResultsAndConstructImage(jobId, config.colorFunction);
 
-    const processedResults = processDCPResults(results, config.colorFunction);
-    
+    document.getElementById("DCPresults").textContent = '';
+    document.getElementById("DCPstatus").textContent = '';
+
     // Display results as a gif
     const encoder = new GIFEncoder();
     window.encoder = encoder; // expose the encoder so I can later download from it.
