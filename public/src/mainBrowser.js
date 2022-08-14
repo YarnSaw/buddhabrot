@@ -95,6 +95,16 @@ function getConfig(ev)
   if (!elements.useSmoothing.checked)
     delete config.smoothingKernel;
   
+  /* example quadratic color function, makes the colors pop a bit more */
+  // config.colorFunction = (visits, mostVisits) => {
+  //   return [
+  //     Math.sqrt(visits) / Math.sqrt(mostVisits) * 255,
+  //     Math.sqrt(visits) / Math.sqrt(mostVisits) * 255,
+  //     0
+  //   ]
+  // }
+
+
   return config;
 }
 
@@ -231,11 +241,11 @@ async function fetchResultsAndConstructImage(jobId, colorFunction)
       range: new dcp['range-object'].RangeObject(i*50, (i+1)*50 - 1 /* values are inclusive */),
     }, ks);
     let results = [];
-
+    console.log(`${i+1} fetch done with success ${success}. Fetching data now.`)
     await Promise.all(payload.map(async r => {
       results.push(await dcp.utils.fetchURI(decodeURIComponent(r.value), [dcpConfig.scheduler.location.origin]));
     }));
-    
+    console.log('Concatenating all fetched results.')
     resultArrays.push(concatenateSets(...(results.map(res => res.set))));
   }
   // Get the remainder of slices
