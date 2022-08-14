@@ -88,6 +88,7 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
     }
     progressPercent++;
   }
+  exports.joinPointsToSet(escapePaths, partialImage, config);
 };
 
 /**
