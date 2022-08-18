@@ -289,6 +289,8 @@ async function generateImage(ev) {
   
   if (document.getElementById("useDCP").checked)
   {
+    const idKs = await dcp.wallet.get({name: 'id'});
+    dcp.wallet.addId(idKs);
     const jobId = await deployDCPJob(config, ev.target.elements);
     console.log("Job is complete, processing image now");
     const { processedResults, width, height } = await fetchResultsAndConstructImage(jobId, config.colorFunction);

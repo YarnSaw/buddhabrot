@@ -65,28 +65,25 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
   const accuracy = 1 / calculationAccuracy;
   const imgSize = partialImage.length * partialImage[0].length
   let escapePaths = [];
-  let pathSize = 0;
   let progressPercent = 0;
-  let progressMax = ((calcDimensions.up - calcDimensions.down) / accuracy) + 10 // + 10 to make sure rounding errors don't cause problems
-  for (let height = calcDimensions.up; height > calcDimensions.down; height = height - accuracy) {
-    for (let width = calcDimensions.left; width < calcDimensions.right; width = width + accuracy) {
+  let progressMax = ((calcDimensions.right - calcDimensions.left) / accuracy) * ((calcDimensions.up - calcDimensions.down) / accuracy) + 10 // + 10 to make sure rounding errors don't cause problems
+  for (let height = calcDimensions.up; height > calcDimensions.down-accuracy /* stop 1 early so no duplicates when image is split up */; height = height - accuracy) {
+    for (let width = calcDimensions.left; width < calcDimensions.right-accuracy /* stop 1 early so no duplicates when image is split up */; width = width + accuracy) {
       if (config.dcp) {
         // @ts-ignore
-        progress(progressPercent/progressMax); // eslint-disable-line no-undef
+        progress(Math.min(.9999, progressPercent/progressMax)); // eslint-disable-line no-undef
       }
+      progressPercent++;
       const path = calculatePath([width, height], iterations, escapeDistance);
       if (path) {
-        escapePaths.push(...path);
-        pathSize++;
-        if (pathSize*iterations > imgSize * 3)
+        escapePaths = escapePaths.concat(path);
+        if (escapePaths.length > imgSize * 3)
         {
           exports.joinPointsToSet(escapePaths, partialImage, config);
-          pathSize = 0;
           escapePaths = [];
         }
       }
     }
-    progressPercent++;
   }
   exports.joinPointsToSet(escapePaths, partialImage, config);
 };
