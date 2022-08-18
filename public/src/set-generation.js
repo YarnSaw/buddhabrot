@@ -77,7 +77,7 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
       const path = calculatePath([width, height], iterations, escapeDistance);
       if (path) {
         escapePaths = escapePaths.concat(path);
-        if (escapePaths.length > imgSize * 3)
+        if (escapePaths.length > imgSize * 10)
         {
           exports.joinPointsToSet(escapePaths, partialImage, config);
           escapePaths = [];
