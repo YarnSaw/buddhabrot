@@ -71,12 +71,12 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
     for (let width = calcDimensions.left; width < calcDimensions.right-accuracy /* stop 1 early so no duplicates when image is split up */; width = width + accuracy) {
       if (config.dcp) {
         // @ts-ignore
-        progress(Math.min(.9999, progressPercent/progressMax)); // eslint-disable-line no-undef
+        progress(progressPercent/progressMax); // eslint-disable-line no-undef
       }
       progressPercent++;
       const path = calculatePath([width, height], iterations, escapeDistance);
       if (path) {
-        escapePaths = escapePaths.concat(path);
+        path.forEach(el => escapePaths.push(el))
         if (escapePaths.length > imgSize * 10)
         {
           exports.joinPointsToSet(escapePaths, partialImage, config);
