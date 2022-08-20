@@ -74,6 +74,15 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
         progress(progressPercent/progressMax); // eslint-disable-line no-undef
       }
       progressPercent++;
+
+      // check if point is in the cardioid or period-2 bulb
+      const p = Math.sqrt((width-1/4)**2 + height**2);
+      const inCardioid = width <= p - 2 * (p**2) + 1/4
+      const inBulb = (width+1)**2 + height**2 <= 1/16
+    
+      if (inBulb || inCardioid)
+        continue;
+
       const path = calculatePath([width, height], iterations, escapeDistance);
       if (path) {
         path.forEach(el => escapePaths.push(el))
