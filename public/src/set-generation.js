@@ -71,7 +71,7 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
     for (let width = calcDimensions.left; width < calcDimensions.right-accuracy /* stop 1 early so no duplicates when image is split up */; width = width + accuracy) {
       if (config.dcp) {
         // @ts-ignore
-        progress(progressPercent/progressMax); // eslint-disable-line no-undef
+        progress(Math.min(0.9999, progressPercent/progressMax)); // eslint-disable-line no-undef
       }
       progressPercent++;
 
