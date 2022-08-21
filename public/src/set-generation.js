@@ -44,13 +44,15 @@ function calculatePath(startPoint, iterations, escapeDistance) {
     realValue = realValueNew + startPoint[0];
     const distanceFromOrigin = realValue ** 2 + complexValue ** 2;
     if (distanceFromOrigin > escapeDistanceSquared) {
-      // The value has 'escaped' to infinity and thus it's path is in the buddhabrot
-      return escapePath;
+      // The value has 'escaped' to infinity and thus it's path is in the buddhabrot. To reduce noise, only count sufficiently long paths.
+      if (i > iterations/10)
+        return escapePath;
+      else
+        return;
     }
     escapePath.push([realValue, complexValue]);
   }
 
-  // eslint-disable-next-line no-useless-return
   return;
 }
 
