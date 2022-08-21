@@ -23,14 +23,12 @@ module.declare([], function(require, exports, modules) {
  * @property {number} totalSegments - total segments the set will be using. Must be a square number to break the segment into a grid.
  * @property {object} [calcDimensions] - dimensions to calculate for one specific slice/segment of the image. Make equal to setDimensions to generate full image, or part of it for good slicing.
  * @property {Boolean} [dcp] - if the generation is done using DCP
- * @property {number[][]} [smoothingKernel] - 3x3 matrix that may be supplied to smooth the image after generation (recommended is all values being 1/9)
  * @property {Boolean} [asyncGen] - have async operations within the buddhabrot generation, for local generation.
  * @property {string|function} colorFunction - function to use to color the image
  *    @param {number} visits - how often this pixel to be colored has been visited
  *    @param {number} mostVisits - number of times the most visited pixel was visited
  *    @returns {array} array with 3 elements: the RGB values of the pixels.
  * 
- * @note Using a smoothingKernel will nearly double the memory used due to inefficiencies in how I coded it that I can't be bothered to fix.
  */
 
 /**
@@ -63,11 +61,6 @@ exports.init = function init() {
         0
       ];
     },
-    smoothingKernel: [
-      [1/9,1/9,1/9],
-      [1/9,1/9,1/9],
-      [1/9,1/9,1/9]
-    ],
     asyncGen: true,
     
   };

@@ -56,27 +56,6 @@ exports.createFrame = async function createFrame(config) {
 
   let flatCleanedSet = pointsInImage.flat();
 
-  if (config.smoothingKernel)
-  {
-    const smoothedFlatCleanSet = new Array(flatCleanedSet.length).fill(0);
-    const map = [-1, 1, width, -width, width + 1, width - 1, -width + 1, -width - 1 ];
-    for (let index = 0; index < flatCleanedSet.length; index++)
-    {
-      let newVisits = 0
-      if ( index%width  == 0
-        || index%width  == width - 1
-        || index - width < 0
-        || index + width > flatCleanedSet.length)
-        continue;
-      for (let [i, elem] of map.entries())
-      {
-        newVisits += flatCleanedSet[index + elem] * config.smoothingKernel[Math.floor(i/3)][i%3];
-      }
-      smoothedFlatCleanSet[index] = newVisits;
-    }
-    flatCleanedSet = smoothedFlatCleanSet;
-  }
-
   const countOfMostVisits = flatCleanedSet.reduce(function(a, b) {
     return Math.max(a, b);
   });

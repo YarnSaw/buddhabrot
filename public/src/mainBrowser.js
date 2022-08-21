@@ -91,9 +91,6 @@ function getConfig(ev)
     asyncGen: elements.asyncGen.checked,
   };
   config.calcDimensions = config.setDimensions;
-
-  if (!elements.useSmoothing.checked)
-    delete config.smoothingKernel;
   
   /* example quadratic color function, makes the colors pop a bit more */
   // config.colorFunction = (visits, mostVisits) => {
@@ -156,6 +153,8 @@ async function deployDCPJob(config, elements)
   job.on('error', (ev) => {
     console.log(ev);
   });
+
+  job.on('cancel', console.error);
 
   document.getElementById("DCPresults").textContent = `0  / ${job.jobInputData.length} slices computed.`
   // var resultsReceived = 0
@@ -252,7 +251,7 @@ async function fetchResultsAndConstructImage(jobId, colorFunction)
     console.log('Concatenating all fetched results.')
     if (results.length)
     {
-    resultArrays.push(concatenateSets(...(results.map(res => res.set))));
+      resultArrays.push(concatenateSets(...(results.map(res => res.set))));
       width = results[0].width;
       height = results[0].height;
     }
@@ -272,7 +271,7 @@ async function fetchResultsAndConstructImage(jobId, colorFunction)
   }));
 
   if (results.length)
-  resultArrays.push(concatenateSets(...(results.map(res => res.set))));
+    resultArrays.push(concatenateSets(...(results.map(res => res.set))));
 
   const overalResult = concatenateSets(...resultArrays);
   const countOfMostVisits = overalResult.reduce(function(a, b) {
@@ -335,7 +334,9 @@ async function generateImage(ev) {
     // Alow browser to update text before fully sync operation. In the future should probably use a web worker for this.
     setTimeout(async () => {
       const { createFrame, displayFrame, } = require('./src/single-frame');
+      const start = Date.now();
       const frame = await createFrame(config);
+      console.log(`set generation took ${Date.now() - start} ms`);
 
       const { processCountsToColor } = require('./src/set-generation');
       if (typeof config.colorFunction === 'string')
