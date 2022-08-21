@@ -228,6 +228,8 @@ async function fetchResultsAndConstructImage(jobId, colorFunction)
   const totalSlices = info.totalSlices;
   const fetches = Math.floor(totalSlices/50);
   let resultArrays = [];
+  let width;
+  let height;
   let firstIter = true;
 
   const ks = await dcp.wallet.get();
@@ -243,10 +245,17 @@ async function fetchResultsAndConstructImage(jobId, colorFunction)
     let results = [];
     console.log(`${i+1} fetch done with success ${success}. Fetching data now.`)
     await Promise.all(payload.map(async r => {
-      results.push(await dcp.utils.fetchURI(decodeURIComponent(r.value), [dcpConfig.scheduler.location.origin]));
+      const res = await dcp.utils.fetchURI(decodeURIComponent(r.value), [dcpConfig.scheduler.location.origin]);
+      if (res.set)
+        results.push(res);
     }));
     console.log('Concatenating all fetched results.')
+    if (results.length)
+    {
     resultArrays.push(concatenateSets(...(results.map(res => res.set))));
+      width = results[0].width;
+      height = results[0].height;
+    }
   }
   // Get the remainder of slices
   const { success, payload } = await conn.send('fetchResult', {
@@ -257,18 +266,18 @@ async function fetchResultsAndConstructImage(jobId, colorFunction)
 
   let results = [];
   await Promise.all(payload.map(async r => {
-    results.push(await dcp.utils.fetchURI(decodeURIComponent(r.value), [dcpConfig.scheduler.location.origin]));
+    const res = await dcp.utils.fetchURI(decodeURIComponent(r.value), [dcpConfig.scheduler.location.origin]);
+      if (res.set)
+        results.push(res);
   }));
 
+  if (results.length)
   resultArrays.push(concatenateSets(...(results.map(res => res.set))));
 
   const overalResult = concatenateSets(...resultArrays);
   const countOfMostVisits = overalResult.reduce(function(a, b) {
     return Math.max(a, b);
   }); 
-
-  const width = results[0].width;
-  const height = results[0].height;
 
   return {width, height, processedResults: [processCountsToColor(overalResult, width, height, countOfMostVisits, colorFunction)]};
 }

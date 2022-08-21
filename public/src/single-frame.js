@@ -81,6 +81,13 @@ exports.createFrame = async function createFrame(config) {
     return Math.max(a, b);
   });
 
+  if (countOfMostVisits === 0)
+    return {
+      set: undefined,
+      width,
+      height,  
+    } 
+
   return {
     set: flatCleanedSet,
     width,
