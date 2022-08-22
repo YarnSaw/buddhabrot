@@ -41,10 +41,10 @@ module.declare([], function(require, exports, modules) {
 exports.init = function init() {
   return {
     setDimensions: {
-      up: 1.1,
-      down: -1.1,
-      right: 0.75,
-      left: -1.5,
+      up: 1.25,
+      down: -1.25,
+      right: 1,
+      left: -1.75,
     },
     segmentNumber: 1,
     totalSegments: 1,

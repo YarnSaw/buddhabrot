@@ -65,8 +65,6 @@ function calculatePath(startPoint, iterations, escapeDistance) {
  */
 exports.generateAllPoints = async function findAllPaths(calcDimensions, calculationAccuracy, iterations, escapeDistance, partialImage, config) {
   const accuracy = 1 / calculationAccuracy;
-  const imgSize = partialImage.length * partialImage[0].length
-  let escapePaths = [];
   let progressPercent = 0;
   let progressMax = ((calcDimensions.right - calcDimensions.left) / accuracy) * ((calcDimensions.up - calcDimensions.down) / accuracy) + 10 // + 10 to make sure rounding errors don't cause problems
   for (let height = calcDimensions.up; height > calcDimensions.down-accuracy /* stop 1 early so no duplicates when image is split up */; height = height - accuracy) {
@@ -86,17 +84,9 @@ exports.generateAllPoints = async function findAllPaths(calcDimensions, calculat
         continue;
 
       const path = calculatePath([width, height], iterations, escapeDistance);
-      if (path) {
-        path.forEach(el => escapePaths.push(el))
-        if (escapePaths.length > imgSize * 10)
-        {
-          exports.joinPointsToSet(escapePaths, partialImage, config);
-          escapePaths = [];
-        }
-      }
+      exports.joinPointsToSet(path, partialImage, config);
     }
   }
-  exports.joinPointsToSet(escapePaths, partialImage, config);
 };
 
 /**

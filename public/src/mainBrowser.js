@@ -78,10 +78,10 @@ function getConfig(ev)
   const config = {
     ...defaultConfig,
     setDimensions: {
-      up: parseFloat(elements.dimU.value) ? parseFloat(elements.dimU.value) : 1.1,
-      down: parseFloat(elements.dimD.value) ? parseFloat(elements.dimD.value) : -1.1,
-      left: parseFloat(elements.dimL.value) ? parseFloat(elements.dimL.value) : -1.5,
-      right: parseFloat(elements.dimR.value) ? parseFloat(elements.dimR.value) : 0.75,
+      up: parseFloat(elements.dimU.value) ? parseFloat(elements.dimU.value) : 1.25,
+      down: parseFloat(elements.dimD.value) ? parseFloat(elements.dimD.value) : -1.25,
+      left: parseFloat(elements.dimL.value) ? parseFloat(elements.dimL.value) : -1.75,
+      right: parseFloat(elements.dimR.value) ? parseFloat(elements.dimR.value) : 1,
     },
     escapeDistance: parseFloat(elements.escapeDistance.value) ? parseFloat(elements.escapeDistance.value) : 3,
     iterations: parseFloat(elements.iterationsSingle.value) ? parseFloat(elements.iterationsSingle.value) : 100,
