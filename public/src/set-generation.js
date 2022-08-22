@@ -48,12 +48,12 @@ function calculatePath(startPoint, iterations, escapeDistance) {
       if (i > iterations/10)
         return escapePath;
       else
-        return;
+        return [];
     }
     escapePath.push([realValue, complexValue]);
   }
 
-  return;
+  return [];
 }
 
 /**
